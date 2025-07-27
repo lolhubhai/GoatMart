@@ -14,7 +14,6 @@ class GoatMartApp {
         this.setupEventListeners();
         this.initializeComponents();
         this.setupServiceWorker();
-        this.setupInfiniteScroll();
     }
 
     setupEventListeners() {
@@ -47,425 +46,37 @@ class GoatMartApp {
             this.handleKeyboardShortcuts(e);
         });
 
-        // Smooth scroll behavior
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('a[href^="#"]')) {
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                const target = document.querySelector(e.target.getAttribute('href'));
+                const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
                     target.scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
                     });
                 }
-            }
-        });
-    }
-
-    setupInfiniteScroll() {
-        const commandsContainer = document.getElementById('commandsContainer');
-        if (!commandsContainer) return;
-
-        // Create loading indicator
-        const loadingIndicator = document.createElement('div');
-        loadingIndicator.id = 'loadingIndicator';
-        loadingIndicator.className = 'infinite-loading';
-        loadingIndicator.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading more commands...</div>';
-        loadingIndicator.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 32px 16px;';
-        loadingIndicator.style.display = 'none';
-        commandsContainer.parentNode.appendChild(loadingIndicator);
-
-        // Set up intersection observer for infinite scroll
-        this.intersectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !this.isLoading && this.hasMoreData) {
-                    this.loadMoreCommands();
-                }
             });
-        }, {
-            rootMargin: '100px',
-            threshold: 0.1
         });
 
-        this.intersectionObserver.observe(loadingIndicator);
-    }
-
-    async loadMoreCommands() {
-        if (this.isLoading || !this.hasMoreData) return;
-
-        this.isLoading = true;
-        this.currentPage++;
-
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) {
-            loadingIndicator.style.display = 'block';
-        }
-
-        try {
-            const params = new URLSearchParams();
-            if (this.currentSearch) params.append('search', this.currentSearch);
-            if (this.currentType !== 'all') params.append('category', this.currentType);
-            params.append('limit', '12');
-            params.append('page', this.currentPage.toString());
-
-            const response = await fetch(`/api/items?${params}`);
-            const data = await response.json();
-
-            if (data.items && data.items.length > 0) {
-                this.appendCommands(data.items);
-                this.hasMoreData = data.items.length === 12 && (this.currentPage * 12) < data.total;
-            } else {
-                this.hasMoreData = false;
-            }
-        } catch (error) {
-            console.error('Error loading more commands:', error);
-            this.showNotification('Failed to load more commands', 'error');
-        } finally {
-            this.isLoading = false;
-            if (loadingIndicator) {
-                loadingIndicator.style.display = 'none';
-            }
-        }
-    }
-
-    appendCommands(commands) {
-        const commandsContainer = document.getElementById('commandsContainer');
-        if (!commandsContainer) return;
-
-        commands.forEach(command => {
-            const commandCard = this.createCommandCard(command);
-            commandsContainer.appendChild(commandCard);
-        });
-    }
-
-    createCommandCard(command) {
-        const truncateDescription = (text, maxLength = 120) => {
-            return text && text.length > maxLength ? text.substring(0, maxLength) + '...' : (text || 'No description available');
-        };
-
-        const commandCard = document.createElement('div');
-        commandCard.className = 'command-card';
-
-        commandCard.innerHTML = `
-            <div class="command-header">
-                <div class="command-title">${this.escapeHtml(command.itemName)}</div>
-                <div class="command-author">by ${this.escapeHtml(command.authorName)}</div>
-            </div>
-            <div class="command-body">
-                <div class="command-description">
-                    ${this.escapeHtml(truncateDescription(command.description))}
-                </div>
-                <div class="command-tags">
-                    <span class="tag">${command.type}</span>
-                    ${command.tags ? command.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('') : ''}
-                </div>
-                <div class="command-actions">
-                    <a href="view.html?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
-                        <i class="material-icons" style="font-size: 18px;">visibility</i>
-                        View
-                    </a>
-                    <button class="btn btn-outlined" onclick="window.app.likeCommand(${command.itemID})">
-                        <i class="material-icons" style="font-size: 18px;">favorite</i>
-                        ${command.likes || 0}
-                    </button>
-                </div>
-            </div>
-        `;
-
-        return commandCard;
-    }
-
-    async loadCommands(search = '', type = 'all', page = 1, append = false) {
-        const container = document.getElementById('commandsContainer');
-
-        // Initialize loading states
-        this.currentPage = page;
-        this.currentSearch = search;
-        this.currentType = type;
-        this.isLoading = true;
-
-        if (!append) {
-            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Loading amazing commands...</div></div>';
-        } else {
-            // Add loading indicator for infinite scroll
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'infinite-loading';
-            loadingDiv.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading more commands...</div>';
-            loadingDiv.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 32px 16px;';
-            container.appendChild(loadingDiv);
-        }
-
-        try {
-            const params = new URLSearchParams();
-            if (search) params.append('search', search);
-            if (type !== 'all') params.append('category', type);
-            params.append('limit', '12');
-            params.append('page', page.toString());
-
-            const response = await fetch(`/api/items?${params}`);
-            const data = await response.json();
-
-            // Remove loading indicators
-            if (append) {
-                const loadingDiv = container.querySelector('.infinite-loading');
-                if (loadingDiv) loadingDiv.remove();
-            }
-
-            if (data.items && data.items.length > 0) {
-                const commandCards = data.items.map(command => this.createCommandCard(command)).join('');
-
-                if (append) {
-                    container.insertAdjacentHTML('beforeend', commandCards);
-                } else {
-                    container.innerHTML = commandCards;
-                }
-
-                // Check if there are more items to load
-                this.hasMoreData = data.items.length === 12 && (page * 12) < data.total;
-
-                // Setup intersection observer for infinite scrolling
-                if (!append) {
-                    this.setupInfiniteScrolling();
-                }
-            } else {
-                if (!append) {
-                    container.innerHTML = `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
-                            <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
-                            <h3 style="margin-bottom: 8px; font-weight: 400;">No commands found</h3>
-                            <p>Try adjusting your search terms or filters</p>
-                        </div>
-                    `;
-                }
-                this.hasMoreData = false;
-            }
-        } catch (error) {
-            console.error('Error loading commands:', error);
-
-            // Remove loading indicators
-            if (append) {
-                const loadingDiv = container.querySelector('.infinite-loading');
-                if (loadingDiv) loadingDiv.remove();
-            } else {
-                container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
-                        <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
-                        <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
-                        <p>Please try again later</p>
-                    </div>
-                `;
-            }
-            this.hasMoreData = false;
-        }
-
-        this.isLoading = false;
-    }
-
-    setupInfiniteScrolling() {
-        // Remove existing observer if any
-        if (this.intersectionObserver) {
-            this.intersectionObserver.disconnect();
-        }
-
-        // Create a sentinel element at the bottom of the container
-        const container = document.getElementById('commandsContainer');
-        const sentinel = document.createElement('div');
-        sentinel.className = 'scroll-sentinel';
-        sentinel.style.cssText = 'height: 10px; grid-column: 1 / -1;';
-        container.appendChild(sentinel);
-
-        // Create intersection observer
-        this.intersectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !this.isLoading && this.hasMoreData) {
-                    this.loadMoreCommands();
-                }
-            });
-        }, {
-            root: null,
-            rootMargin: '100px',
-            threshold: 0.1
+        // Button ripple effects
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', this.createRipple);
         });
 
-        this.intersectionObserver.observe(sentinel);
-    }
-
-    async likeCommand(itemID) {
-        try {
-            const response = await fetch(`/api/items/${itemID}/like`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const result = await response.json();
-            if (result.success) {
-                // Update like count in UI without reloading all commands
-                const likeButton = document.querySelector(`button[onclick*="likeCommand(${itemID})"]`);
-                if (likeButton) {
-                    const likeText = likeButton.querySelector('i').nextSibling;
-                    if (likeText) {
-                        likeText.textContent = ` ${result.likes || 0}`;
-                    }
-                }
-
-                // Show success snackbar
-                this.showToast('Command liked! ❤️');
-            }
-        } catch (error) {
-            console.error('Error liking command:', error);
-            this.showToast('Error liking command', 'error');
-        }
-    }
-
-    showToast(message, type = 'info') {
-        this.showFallbackNotification(message, type, 4000);
-    }
-
-    showFallbackNotification(message, type, duration) {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.style.cssText = `
-            position: fixed;
-            bottom: 80px;
-            left: 16px;
-            right: 16px;
-            background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
-            color: white;
-            padding: 16px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            z-index: 1003;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-width: 400px;
-            margin: 0 auto;
-            text-align: center;
-        `;
-        notification.textContent = message;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.transform = 'translateY(0)';
-        }, 100);
-
-        setTimeout(() => {
-            notification.style.transform = 'translateY(100%)';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, duration);
-    }
-
-    showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.innerHTML = `
-            <span>${message}</span>
-            <button class="notification-close">&times;</button>
-        `;
-
-        document.body.appendChild(notification);
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 5000);
-
-        // Manual close
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            notification.remove();
+        // Card hover effects
+        document.querySelectorAll('.command-card').forEach(card => {
+            card.addEventListener('mouseenter', this.handleCardHover);
+            card.addEventListener('mouseleave', this.handleCardLeave);
         });
-    }
 
-    // Utility functions
-    static formatNumber(num) {
-        if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + 'M';
-        } else if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'K';
-        }
-        return num.toString();
-    }
-
-    static formatDate(date) {
-        const now = new Date();
-        const diff = now - new Date(date);
-        const seconds = Math.floor(diff / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (days > 0) {
-            return `${days} day${days > 1 ? 's' : ''} ago`;
-        } else if (hours > 0) {
-            return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-        } else if (minutes > 0) {
-            return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-        } else {
-            return 'Just now';
-        }
-    }
-
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    static throttle(func, limit) {
-        let inThrottle;
-        return function(...args) {
-            if (!inThrottle) {
-                func.apply(this, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    }
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML;
-    }
-
-    static copyToClipboard(text) {
-        return navigator.clipboard.writeText(text).then(() => {
-            return true;
-        }).catch(() => {
-            // Fallback for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-
-            try {
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                return true;
-            } catch (err) {
-                document.body.removeChild(textArea);
-                return false;
-            }
-        });
+        // Form enhancements
+        this.setupFormEnhancements();
     }
 
     setupSearchAndFilters() {
+        // Search functionality
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', this.debounce((e) => {
@@ -479,7 +90,6 @@ class GoatMartApp {
         const chips = document.querySelectorAll('.chip');
         chips.forEach(chip => {
             chip.addEventListener('click', () => {
-                const chips = document.querySelectorAll('.chip');
                 chips.forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 this.currentType = chip.dataset.type;
@@ -487,6 +97,32 @@ class GoatMartApp {
                 this.loadCommands(this.currentSearch, this.currentType, 1, false);
             });
         });
+    }
+
+    initializeComponents() {
+        // Initialize tooltips
+        this.initTooltips();
+
+        // Initialize lazy loading
+        this.initLazyLoading();
+
+        // Initialize intersection observers
+        this.initScrollAnimations();
+
+        // Initialize touch gestures for mobile
+        this.initTouchGestures();
+    }
+
+    setupServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('ServiceWorker registration failed:', error);
+                });
+        }
     }
 
     detectColorScheme() {
@@ -498,16 +134,6 @@ class GoatMartApp {
         });
     }
 
-    applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-
-        // Update theme color meta tag for Android
-        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-        if (themeColorMeta) {
-            themeColorMeta.content = theme === 'dark' ? '#121212' : '#6366f1';
-        }
-    }
-
     setupThemeToggle() {
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
@@ -517,6 +143,16 @@ class GoatMartApp {
                 this.applyTheme(newTheme);
                 localStorage.setItem('theme', newTheme);
             });
+        }
+    }
+
+    applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // Update theme color meta tag for Android
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+            themeColorMeta.content = theme === 'dark' ? '#121212' : '#6366f1';
         }
     }
 
@@ -670,13 +306,6 @@ class GoatMartApp {
                 searchInput.value = '';
                 searchInput.blur();
             }
-
-            // Escape key to close modals
-            const openModal = document.querySelector('.modal[style*="flex"]');
-            if (openModal) {
-                openModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
         }
     }
 
@@ -790,53 +419,316 @@ class GoatMartApp {
         requestAnimationFrame(animate);
     }
 
-    setupServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(registration => {
-                    console.log('SW registered:', registration);
-                })
-                .catch(error => {
-                    console.log('SW registration failed:', error);
-                });
+    async loadCommands(search = '', type = 'all', page = 1, append = false) {
+        const container = document.getElementById('commandsContainer');
+
+        // Initialize loading states
+        this.currentPage = page;
+        this.currentSearch = search;
+        this.currentType = type;
+        this.isLoading = true;
+
+        if (!append) {
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Loading amazing commands...</div></div>';
+        } else {
+            // Add loading indicator for infinite scroll
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'infinite-loading';
+            loadingDiv.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading more commands...</div>';
+            loadingDiv.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 32px 16px;';
+            container.appendChild(loadingDiv);
+        }
+
+        try {
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (type !== 'all') params.append('category', type);
+            params.append('limit', '12');
+            params.append('page', page.toString());
+
+            const response = await fetch(`/api/items?${params}`);
+            const data = await response.json();
+
+            // Remove loading indicators
+            if (append) {
+                const loadingDiv = container.querySelector('.infinite-loading');
+                if (loadingDiv) loadingDiv.remove();
+            }
+
+            if (data.items && data.items.length > 0) {
+                const commandCards = data.items.map(command => this.createCommandCard(command)).join('');
+
+                if (append) {
+                    container.insertAdjacentHTML('beforeend', commandCards);
+                } else {
+                    container.innerHTML = commandCards;
+                }
+
+                // Check if there are more items to load
+                this.hasMoreData = data.items.length === 12 && (page * 12) < data.total;
+
+                // Setup intersection observer for infinite scrolling
+                if (!append) {
+                    this.setupInfiniteScrolling();
+                }
+            } else {
+                if (!append) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
+                            <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
+                            <h3 style="margin-bottom: 8px; font-weight: 400;">No commands found</h3>
+                            <p>Try adjusting your search terms or filters</p>
+                        </div>
+                    `;
+                }
+                this.hasMoreData = false;
+            }
+        } catch (error) {
+            console.error('Error loading commands:', error);
+
+            // Remove loading indicators
+            if (append) {
+                const loadingDiv = container.querySelector('.infinite-loading');
+                if (loadingDiv) loadingDiv.remove();
+            } else {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
+                        <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
+                        <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+            this.hasMoreData = false;
+        }
+
+        this.isLoading = false;
+    }
+
+    setupInfiniteScrolling() {
+        // Remove existing observer if any
+        if (this.intersectionObserver) {
+            this.intersectionObserver.disconnect();
+        }
+
+        // Create a sentinel element at the bottom of the container
+        const container = document.getElementById('commandsContainer');
+        const sentinel = document.createElement('div');
+        sentinel.className = 'scroll-sentinel';
+        sentinel.style.cssText = 'height: 10px; grid-column: 1 / -1;';
+        container.appendChild(sentinel);
+
+        // Create intersection observer
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !this.isLoading && this.hasMoreData) {
+                    this.loadMoreCommands();
+                }
+            });
+        }, {
+            root: null,
+            rootMargin: '100px',
+            threshold: 0.1
+        });
+
+        this.intersectionObserver.observe(sentinel);
+    }
+
+    async loadMoreCommands() {
+        if (this.isLoading || !this.hasMoreData) return;
+
+        this.currentPage++;
+        await this.loadCommands(this.currentSearch, this.currentType, this.currentPage, true);
+    }
+
+    createCommandCard(command) {
+        const truncateDescription = (text, maxLength = 120) => {
+            return text && text.length > maxLength ? text.substring(0, maxLength) + '...' : (text || 'No description available');
+        };
+
+        return `
+            <div class="command-card">
+                <div class="command-header">
+                    <div class="command-title">${this.escapeHtml(command.itemName)}</div>
+                    <div class="command-author">by ${this.escapeHtml(command.authorName)}</div>
+                </div>
+                <div class="command-body">
+                    <div class="command-description">
+                        ${this.escapeHtml(truncateDescription(command.description))}
+                    </div>
+                    <div class="command-tags">
+                        <span class="tag">${command.type}</span>
+                        ${command.tags ? command.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('') : ''}
+                    </div>
+                    <div class="command-actions">
+                        <a href="view.html?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
+                            <i class="material-icons" style="font-size: 18px;">visibility</i>
+                            View
+                        </a>
+                        <button class="btn btn-outlined" onclick="window.app.likeCommand(${command.itemID})">
+                            <i class="material-icons" style="font-size: 18px;">favorite</i>
+                            ${command.likes || 0}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    async likeCommand(itemID) {
+        try {
+            const response = await fetch(`/api/items/${itemID}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                // Update like count in UI without reloading all commands
+                const likeButton = document.querySelector(`button[onclick*="likeCommand(${itemID})"]`);
+                if (likeButton) {
+                    const likeText = likeButton.querySelector('i').nextSibling;
+                    if (likeText) {
+                        likeText.textContent = ` ${result.likes || 0}`;
+                    }
+                }
+
+                // Show success snackbar
+                this.showToast('Command liked! ❤️');
+            }
+        } catch (error) {
+            console.error('Error liking command:', error);
+            this.showToast('Error liking command', 'error');
         }
     }
 
-    initializeComponents() {
-        // Initialize any UI components that need setup
-        this.setupModalHandlers();
-        this.setupFormValidation();
-        this.initTooltips();
-        this.initLazyLoading();
-        this.initScrollAnimations();
-        this.initTouchGestures();
-        this.setupFormEnhancements();
+    showToast(message, type = 'info') {
+        this.showFallbackNotification(message, type, 4000);
     }
 
-    setupModalHandlers() {
-        // Handle modal open/close
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-modal-open]')) {
-                const modalId = e.target.getAttribute('data-modal-open');
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'flex';
-                    document.body.style.overflow = 'hidden';
-                }
-            }
+    showFallbackNotification(message, type, duration) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 1003;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        `;
+        notification.textContent = message;
 
-            if (e.target.matches('[data-modal-close]') || e.target.matches('.modal-overlay')) {
-                const modal = e.target.closest('.modal');
-                if (modal) {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.transform = 'translateY(0)';
+        }, 100);
+
+        setTimeout(() => {
+            notification.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
                 }
+            }, 300);
+        }, duration);
+    }
+
+    showNotification(message, type) {
+        this.showFallbackNotification(message, type, 4000);
+    }
+
+    // Utility functions
+    static formatNumber(num) {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toString();
+    }
+
+    static formatDate(date) {
+        const now = new Date();
+        const diff = now - new Date(date);
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (days > 0) {
+            return `${days} day${days > 1 ? 's' : ''} ago`;
+        } else if (hours > 0) {
+            return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        } else if (minutes > 0) {
+            return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+        } else {
+            return 'Just now';
+        }
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    static throttle(func, limit) {
+        let inThrottle;
+        return function(...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+
+    static copyToClipboard(text) {
+        return navigator.clipboard.writeText(text).then(() => {
+            return true;
+        }).catch(() => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return true;
+            } catch (err) {
+                document.body.removeChild(textArea);
+                return false;
             }
         });
-    }
-
-    setupFormValidation() {
-        // Add form validation logic here if needed
     }
 }
 
