@@ -310,8 +310,20 @@ app.post('/api/items/:id/like', async (req, res) => {
 // Paste-like endpoints
 app.post('/v1/paste', async (req, res) => {
   try {
-    const { code, itemName, type = 'GoatBot', authorName = 'Unknown' } = req.body;
+    const { 
+      code, 
+      itemName, 
+      description, 
+      type = 'GoatBot', 
+      authorName = 'Unknown',
+      tags = [],
+      difficulty = 'Intermediate'
+    } = req.body;
+    
     if (!code) return res.status(400).json({ error: 'Code is required' });
+    if (!description || description.trim() === '') {
+      return res.status(400).json({ error: 'Description is required' });
+    }
 
     const itemID = await Item.countDocuments() + 1;
     const shortId = generateId();
@@ -320,20 +332,107 @@ app.post('/v1/paste', async (req, res) => {
       itemID,
       shortId,
       itemName: itemName || 'Untitled',
-      description: 'Uploaded via paste endpoint',
+      description: description.trim(),
       type,
       code,
-      authorName
+      authorName,
+      tags: Array.isArray(tags) ? tags : [],
+      difficulty
     });
 
     await newItem.save();
+    
+    // Update stats
+    try {
+      let stats = await Stats.findOne();
+      if (!stats) {
+        stats = new Stats();
+      }
+      stats.totalUploads++;
+      await stats.save();
+    } catch (error) {
+      console.error('Error updating stats:', error);
+    }
+
     res.json({ 
       success: true,
       link: `${req.protocol}://${req.get('host')}/raw/${shortId}`,
       id: shortId,
-      itemID
+      itemID,
+      message: 'Command uploaded successfully with custom description'
     });
   } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Add new command with manual description
+app.post('/api/items', async (req, res) => {
+  try {
+    const { 
+      itemName, 
+      description, 
+      type, 
+      code, 
+      authorName,
+      tags = [],
+      difficulty = 'Intermediate'
+    } = req.body;
+    
+    // Validate required fields
+    if (!itemName || !itemName.trim()) {
+      return res.status(400).json({ error: 'Command name is required' });
+    }
+    if (!description || !description.trim()) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+    if (!code || !code.trim()) {
+      return res.status(400).json({ error: 'Code is required' });
+    }
+    if (!type) {
+      return res.status(400).json({ error: 'Type is required' });
+    }
+
+    const itemID = await Item.countDocuments() + 1;
+    const shortId = generateId();
+
+    const newItem = new Item({
+      itemID,
+      shortId,
+      itemName: itemName.trim(),
+      description: description.trim(),
+      type,
+      code: code.trim(),
+      authorName: authorName || 'Anonymous',
+      tags: Array.isArray(tags) ? tags.filter(tag => tag.trim()) : [],
+      difficulty
+    });
+
+    await newItem.save();
+    
+    // Update stats
+    try {
+      let stats = await Stats.findOne();
+      if (!stats) {
+        stats = new Stats();
+      }
+      stats.totalUploads++;
+      await stats.save();
+    } catch (error) {
+      console.error('Error updating stats:', error);
+    }
+
+    res.json({ 
+      success: true,
+      itemId: itemID,
+      shortId: shortId,
+      link: `${req.protocol}://${req.get('host')}/raw/${shortId}`,
+      viewLink: `${req.protocol}://${req.get('host')}/view.html?id=${itemID}`,
+      message: 'Command uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Error creating item:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
