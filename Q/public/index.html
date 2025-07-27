@@ -1,0 +1,1072 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>GoatMart - Premium Bot Commands</title>
+    
+    <!-- Theme Color for Android -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Material+Icons+Outlined&family=Material+Icons&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        /* Android Material Design Variables */
+        :root {
+            --primary: #6366f1;
+            --primary-variant: #4f46e5;
+            --secondary: #10b981;
+            --secondary-variant: #059669;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --error: #ef4444;
+            --on-primary: #ffffff;
+            --on-secondary: #ffffff;
+            --on-surface: #1f2937;
+            --on-background: #374151;
+            --elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --elevation-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            --elevation-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+            --elevation-4: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+            --elevation-5: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+            --radius-small: 4px;
+            --radius-medium: 8px;
+            --radius-large: 16px;
+            --radius-extra-large: 28px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--on-background);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* Material Design Top App Bar */
+        .top-app-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: var(--elevation-2);
+            border-bottom: 1px solid rgba(0,0,0,0.12);
+        }
+
+        .app-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .app-bar-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--on-primary);
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+
+        .app-subtitle {
+            font-size: 12px;
+            color: var(--on-surface);
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .app-bar-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Material Design Buttons */
+        .btn {
+            border: none;
+            border-radius: var(--radius-large);
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        .btn-fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--on-primary);
+            box-shadow: var(--elevation-3);
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            z-index: 100;
+            font-size: 24px;
+        }
+
+        .btn-fab:hover {
+            box-shadow: var(--elevation-4);
+            transform: scale(1.05);
+        }
+
+        .btn-contained {
+            background: var(--primary);
+            color: var(--on-primary);
+            padding: 12px 24px;
+            box-shadow: var(--elevation-1);
+        }
+
+        .btn-contained:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-1px);
+        }
+
+        .btn-outlined {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 11px 23px;
+        }
+
+        .btn-outlined:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        .btn-text {
+            background: transparent;
+            color: var(--primary);
+            padding: 12px 16px;
+        }
+
+        .btn-text:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        /* Ripple Effect */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 64px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* Hero Section with Android Design */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            color: var(--on-primary);
+            padding: 48px 16px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: clamp(28px, 6vw, 48px);
+            font-weight: 400;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(16px, 3vw, 20px);
+            opacity: 0.9;
+            margin-bottom: 32px;
+            font-weight: 300;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-number {
+            font-size: 32px;
+            font-weight: 300;
+            display: block;
+        }
+
+        .hero-stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Material Design Cards */
+        .card-container {
+            padding: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-card {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 24px;
+            margin: -32px 16px 24px;
+            box-shadow: var(--elevation-3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-input-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 56px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: var(--radius-small);
+            padding: 0 16px 0 56px;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            background: var(--surface);
+            color: var(--on-surface);
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            border-width: 2px;
+            padding-left: 55px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(0,0,0,0.54);
+            font-size: 24px;
+        }
+
+        /* Material Design Chips */
+        .chip-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .chip-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip {
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            border-radius: 16px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chip.active {
+            background: var(--primary);
+            color: var(--on-primary);
+            border-color: var(--primary);
+        }
+
+        .chip:hover:not(.active) {
+            background: rgba(99, 102, 241, 0.20);
+        }
+
+        /* Stats Grid */
+        .stats-section {
+            padding: 32px 16px;
+            background: var(--background);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius-medium);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--elevation-1);
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: var(--on-primary);
+            font-size: 24px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 300;
+            color: var(--on-surface);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--on-surface);
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Commands Grid */
+        .commands-section {
+            padding: 32px 16px;
+            background: var(--surface);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 24px;
+            text-align: center;
+            color: var(--on-surface);
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .command-card {
+            background: var(--surface);
+            border-radius: var(--radius-medium);
+            box-shadow: var(--elevation-1);
+            overflow: hidden;
+            transition: all 0.2s;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .command-card:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-2px);
+        }
+
+        .command-header {
+            padding: 16px;
+            background: var(--background);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .command-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--on-surface);
+        }
+
+        .command-author {
+            font-size: 14px;
+            color: var(--on-surface);
+            opacity: 0.7;
+        }
+
+        .command-body {
+            padding: 16px;
+        }
+
+        .command-description {
+            font-size: 14px;
+            color: var(--on-surface);
+            opacity: 0.8;
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        .command-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .command-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 64px 16px;
+            color: var(--on-primary);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--on-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        /* Bottom Navigation for Mobile */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid rgba(0,0,0,0.12);
+            display: none;
+            z-index: 100;
+        }
+
+        .bottom-nav-content {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            color: var(--on-surface);
+            opacity: 0.6;
+            text-decoration: none;
+            transition: opacity 0.2s;
+            font-size: 12px;
+        }
+
+        .bottom-nav-item.active {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .bottom-nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .app-bar-title .app-subtitle {
+                display: none;
+            }
+
+            .app-bar-actions .btn-contained {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .hero-section {
+                padding: 32px 16px;
+            }
+
+            .search-card {
+                margin: -16px 8px 16px;
+                padding: 16px;
+            }
+
+            .card-container {
+                padding: 8px;
+            }
+
+            .stats-section,
+            .commands-section {
+                padding: 24px 8px;
+            }
+
+            .commands-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .bottom-nav {
+                display: block;
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+
+            .main-content {
+                margin-bottom: 70px;
+            }
+
+            .btn-fab {
+                display: none;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --surface: #121212;
+                --background: #1e1e1e;
+                --on-surface: #ffffff;
+                --on-background: #ffffff;
+            }
+            
+            .top-app-bar {
+                background: rgba(18, 18, 18, 0.95);
+            }
+            
+            .search-input {
+                background: var(--surface);
+                color: var(--on-surface);
+                border-color: rgba(255, 255, 255, 0.12);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Material Design Top App Bar -->
+    <header class="top-app-bar">
+        <div class="app-bar-content">
+            <div class="app-bar-title">
+                <div class="app-icon">
+                    <i class="material-icons">code</i>
+                </div>
+                <div>
+                    <div class="app-title">GoatMart</div>
+                    <div class="app-subtitle">Premium Bot Commands Hub</div>
+                </div>
+            </div>
+            <div class="app-bar-actions">
+                <a href="upload.html" class="btn btn-contained">
+                    <i class="material-icons" style="font-size: 18px;">add</i>
+                    <span>Upload</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Floating Action Button -->
+    <a href="upload.html" class="btn-fab" aria-label="Upload Command">
+        <i class="material-icons">add</i>
+    </a>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Discover Amazing Bot Commands</h1>
+                <p class="hero-subtitle">Premium collection for GoatBot, MiraiBot & AutoBot with beautiful code viewer</p>
+                
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="heroCommands">-</span>
+                        <span class="hero-stat-label">Commands</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="heroLikes">-</span>
+                        <span class="hero-stat-label">Likes</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="heroUsers">-</span>
+                        <span class="hero-stat-label">Users</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Card -->
+        <div class="card-container">
+            <div class="search-card">
+                <div class="search-input-container">
+                    <i class="material-icons search-icon">search</i>
+                    <input type="text" class="search-input" placeholder="Search for amazing commands..." id="searchInput">
+                </div>
+                
+                <div class="chip-container">
+                    <button class="chip active" data-type="all">All Commands</button>
+                    <button class="chip" data-type="GoatBot">GoatBot</button>
+                    <button class="chip" data-type="MiraiBot">MiraiBot</button>
+                    <button class="chip" data-type="AutoBot">AutoBot</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="material-icons">code</i>
+                    </div>
+                    <div class="stat-number" id="totalCommands">-</div>
+                    <div class="stat-label">Total Commands</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="material-icons">favorite</i>
+                    </div>
+                    <div class="stat-number" id="totalLikes">-</div>
+                    <div class="stat-label">Total Likes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="material-icons">people</i>
+                    </div>
+                    <div class="stat-number" id="activeUsers">-</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="material-icons">share</i>
+                    </div>
+                    <div class="stat-number" id="totalShares">-</div>
+                    <div class="stat-label">Total Shares</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commands Section -->
+        <section class="commands-section">
+            <h2 class="section-title">Featured Commands</h2>
+            <div class="commands-grid" id="commandsContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading amazing commands...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation for Mobile -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-content">
+            <a href="#" class="bottom-nav-item active">
+                <i class="material-icons">home</i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="bottom-nav-item">
+                <i class="material-icons">search</i>
+                <span>Search</span>
+            </a>
+            <a href="upload.html" class="bottom-nav-item">
+                <i class="material-icons">add_circle</i>
+                <span>Upload</span>
+            </a>
+            <a href="#" class="bottom-nav-item">
+                <i class="material-icons">person</i>
+                <span>Profile</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script>
+        // Additional initialization after main app loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // App is already initialized via main.js
+            console.log('GoatMart app initialized successfully');
+        });
+
+        function initMaterialDesign() {
+            // Add ripple effect to buttons
+            document.querySelectorAll('.btn, .chip').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    let ripple = document.createElement('span');
+                    let rect = this.getBoundingClientRect();
+                    let size = Math.max(rect.width, rect.height);
+                    let x = e.clientX - rect.left - size / 2;
+                    let y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.3);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        left: ${x}px;
+                        top: ${y}px;
+                        width: ${size}px;
+                        height: ${size}px;
+                        pointer-events: none;
+                    `;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add focus management for accessibility
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-navigation');
+                }
+            });
+
+            document.addEventListener('mousedown', function() {
+                document.body.classList.remove('keyboard-navigation');
+            });
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', debounce(handleSearch, 300));
+
+            // Filter chips
+            const chips = document.querySelectorAll('.chip');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    chips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    handleFilter(chip.dataset.type);
+                });
+            });
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                // Animate counter updates
+                animateCounter('totalCommands', stats.totalCommands || 0);
+                animateCounter('totalLikes', stats.totalLikes || 0);
+                animateCounter('activeUsers', stats.dailyActiveUsers || 0);
+                animateCounter('totalShares', stats.totalShares || 0);
+                
+                // Update hero stats
+                animateCounter('heroCommands', stats.totalCommands || 0);
+                animateCounter('heroLikes', stats.totalLikes || 0);
+                animateCounter('heroUsers', stats.dailyActiveUsers || 0);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadCommands(search = '', type = 'all') {
+            const container = document.getElementById('commandsContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Loading amazing commands...</div></div>';
+
+            try {
+                const params = new URLSearchParams();
+                if (search) params.append('search', search);
+                if (type !== 'all') params.append('category', type);
+                params.append('limit', '12');
+
+                const response = await fetch(`/api/items?${params}`);
+                const data = await response.json();
+
+                if (data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.map(createCommandCard).join('');
+                } else {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
+                            <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
+                            <h3 style="margin-bottom: 8px; font-weight: 400;">No commands found</h3>
+                            <p>Try adjusting your search terms or filters</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading commands:', error);
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
+                        <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
+                        <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createCommandCard(command) {
+            const truncateDescription = (text, maxLength = 120) => {
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            };
+
+            return `
+                <div class="command-card">
+                    <div class="command-header">
+                        <div class="command-title">${escapeHtml(command.itemName)}</div>
+                        <div class="command-author">by ${escapeHtml(command.authorName)}</div>
+                    </div>
+                    <div class="command-body">
+                        <div class="command-description">
+                            ${escapeHtml(truncateDescription(command.description))}
+                        </div>
+                        <div class="command-tags">
+                            <span class="tag">${command.type}</span>
+                            ${command.tags ? command.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('') : ''}
+                        </div>
+                        <div class="command-actions">
+                            <a href="view.html?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
+                                <i class="material-icons" style="font-size: 18px;">visibility</i>
+                                View
+                            </a>
+                            <button class="btn btn-outlined" onclick="likeCommand(${command.itemID})">
+                                <i class="material-icons" style="font-size: 18px;">favorite</i>
+                                ${command.likes || 0}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleSearch(event) {
+            const searchTerm = event.target.value;
+            const activeFilter = document.querySelector('.chip.active').dataset.type;
+            loadCommands(searchTerm, activeFilter);
+        }
+
+        function handleFilter(type) {
+            const searchTerm = document.getElementById('searchInput').value;
+            loadCommands(searchTerm, type);
+        }
+
+        async function likeCommand(itemID) {
+            try {
+                const response = await fetch(`/api/items/${itemID}/like`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    // Reload commands to show updated like count
+                    const searchTerm = document.getElementById('searchInput').value;
+                    const activeFilter = document.querySelector('.chip.active').dataset.type;
+                    loadCommands(searchTerm, activeFilter);
+                    
+                    // Show success snackbar
+                    showSnackbar('Command liked! ❤️');
+                }
+            } catch (error) {
+                console.error('Error liking command:', error);
+                showSnackbar('Error liking command', 'error');
+            }
+        }
+
+        function showSnackbar(message, type = 'success') {
+            const snackbar = document.createElement('div');
+            snackbar.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                left: 16px;
+                right: 16px;
+                background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                color: white;
+                padding: 16px;
+                border-radius: var(--radius-small);
+                font-weight: 500;
+                z-index: 1001;
+                transform: translateY(100px);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: var(--elevation-3);
+                max-width: 400px;
+                margin: 0 auto;
+            `;
+            snackbar.textContent = message;
+            document.body.appendChild(snackbar);
+            
+            setTimeout(() => snackbar.style.transform = 'translateY(0)', 100);
+            setTimeout(() => {
+                snackbar.style.transform = 'translateY(100px)';
+                setTimeout(() => document.body.removeChild(snackbar), 300);
+            }, 3000);
+        }
+
+        function animateCounter(elementId, target) {
+            const element = document.getElementById(elementId);
+            const start = 0;
+            const duration = 1000;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(progress * target);
+                element.textContent = current;
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Add ripple animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                0% {
+                    transform: scale(0);
+                    opacity: 0.6;
+                }
+                100% {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

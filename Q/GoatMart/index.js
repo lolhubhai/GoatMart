@@ -366,42 +366,4 @@ app.get('/v1/paste/:shortId', async (req, res) => {
   }
 });
 
-// Delete command endpoint
-app.delete('/api/items/:id', async (req, res) => {
-  try {
-    const itemID = parseInt(req.params.id);
-    const item = await Item.findOne({ itemID });
-    
-    if (!item) {
-      return res.status(404).json({ error: 'Command not found' });
-    }
-    
-    await Item.deleteOne({ itemID });
-    
-    // Update stats if needed
-    try {
-      let stats = await Stats.findOne();
-      if (stats) {
-        stats.totalRequests++;
-        await stats.save();
-      }
-    } catch (error) {
-      console.error('Error updating stats:', error);
-    }
-    
-    res.json({ 
-      success: true, 
-      message: 'Command deleted successfully',
-      deletedItem: {
-        itemID: item.itemID,
-        itemName: item.itemName,
-        authorName: item.authorName
-      }
-    });
-  } catch (error) {
-    console.error('Error deleting command:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 app.listen(port, '0.0.0.0', () => console.log(`Server running at http://0.0.0.0:${port}`));

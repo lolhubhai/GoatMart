@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Upload Command - GoatMart</title>
+    
+    <!-- Theme Color for Android -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Material+Icons+Outlined&family=Material+Icons&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/mobile.css">
+    
+    <style>
+        /* Android Material Design Variables */
+        :root {
+            --primary: #6366f1;
+            --primary-variant: #4f46e5;
+            --secondary: #10b981;
+            --secondary-variant: #059669;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --error: #ef4444;
+            --on-primary: #ffffff;
+            --on-secondary: #ffffff;
+            --on-surface: #1f2937;
+            --on-background: #374151;
+            --elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --elevation-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            --elevation-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+            --radius-small: 4px;
+            --radius-medium: 8px;
+            --radius-large: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--on-background);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Material Design Top App Bar */
+        .top-app-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: var(--elevation-2);
+            border-bottom: 1px solid rgba(0,0,0,0.12);
+        }
+
+        .app-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .app-bar-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--on-surface);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(0,0,0,0.04);
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 64px;
+            min-height: calc(100vh - 64px);
+            padding: 24px 16px;
+        }
+
+        .upload-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .upload-card {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 32px;
+            box-shadow: var(--elevation-3);
+            margin-bottom: 24px;
+        }
+
+        .upload-title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            color: var(--on-surface);
+            text-align: center;
+        }
+
+        .upload-subtitle {
+            color: var(--on-surface);
+            opacity: 0.7;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--on-surface);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: var(--radius-small);
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            background: var(--surface);
+            color: var(--on-surface);
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            border-width: 2px;
+            padding: 15px;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Material Design Buttons */
+        .btn {
+            border: none;
+            border-radius: var(--radius-small);
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        .btn-contained {
+            background: var(--primary);
+            color: var(--on-primary);
+            padding: 16px 32px;
+            box-shadow: var(--elevation-1);
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .btn-contained:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-1px);
+        }
+
+        .btn-outlined {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 15px 31px;
+            width: 100%;
+        }
+
+        .btn-outlined:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 16px;
+            border-radius: var(--radius-small);
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .upload-card {
+                padding: 24px 16px;
+                margin: 0 8px 16px;
+            }
+
+            .main-content {
+                padding: 16px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Material Design Top App Bar -->
+    <header class="top-app-bar">
+        <div class="app-bar-content">
+            <div class="app-bar-title">
+                <button class="back-btn" onclick="window.history.back()">
+                    <i class="material-icons">arrow_back</i>
+                </button>
+                <div class="app-title">Upload Command</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="upload-container">
+            <div class="upload-card">
+                <h1 class="upload-title">Share Your Command</h1>
+                <p class="upload-subtitle">Upload your bot command to help the community</p>
+                
+                <div id="message" class="message"></div>
+
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label class="form-label" for="itemName">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">title</i>
+                            Command Name
+                        </label>
+                        <input type="text" id="itemName" name="itemName" class="form-input" required 
+                               placeholder="Enter your command name">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="type">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">category</i>
+                            Bot Type
+                        </label>
+                        <select id="type" name="type" class="form-select" required>
+                            <option value="">Select bot type</option>
+                            <option value="GoatBot">GoatBot</option>
+                            <option value="MiraiBot">MiraiBot</option>
+                            <option value="AutoBot">AutoBot</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="authorName">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">person</i>
+                            Author Name
+                        </label>
+                        <input type="text" id="authorName" name="authorName" class="form-input" required 
+                               placeholder="Your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="description">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">description</i>
+                            Description
+                        </label>
+                        <textarea id="description" name="description" class="form-textarea" required 
+                                  placeholder="Describe what your command does"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="code">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">code</i>
+                            Command Code
+                        </label>
+                        <textarea id="code" name="code" class="form-textarea" required 
+                                  placeholder="Paste your command code here" style="min-height: 200px; font-family: 'Courier New', monospace;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-contained">
+                        <i class="material-icons">cloud_upload</i>
+                        Upload Command
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="js/android-ui.js"></script>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const messageDiv = document.getElementById('message');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="material-icons">hourglass_empty</i> Uploading...';
+            submitBtn.disabled = true;
+            
+            const formData = {
+                itemName: document.getElementById('itemName').value,
+                type: document.getElementById('type').value,
+                authorName: document.getElementById('authorName').value,
+                description: document.getElementById('description').value,
+                code: document.getElementById('code').value
+            };
+            
+            try {
+                const response = await fetch('/v1/paste', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.className = 'message success';
+                    messageDiv.style.display = 'block';
+                    messageDiv.innerHTML = `
+                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</i>
+                        Command uploaded successfully! <a href="view.html?id=${result.itemID}" style="color: var(--secondary); text-decoration: underline;">View your command</a>
+                    `;
+                    
+                    // Reset form
+                    e.target.reset();
+                    
+                    // Show snackbar
+                    if (window.AndroidUI) {
+                        AndroidUI.showSnackbar('Command uploaded successfully! 🎉');
+                    }
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = `view.html?id=${result.itemID}`;
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                messageDiv.innerHTML = `
+                    <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">error</i>
+                    Error: ${error.message}
+                `;
+                
+                if (window.AndroidUI) {
+                    AndroidUI.showSnackbar('Upload failed. Please try again.', null, 3000);
+                }
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = '<i class="material-icons">cloud_upload</i> Upload Command';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
