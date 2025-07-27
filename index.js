@@ -7,6 +7,14 @@ const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
+// Maintenance mode settings
+let maintenanceSettings = {
+  enabled: false,
+  title: "🚧 Website Under Maintenance",
+  message: "We're currently performing scheduled maintenance to improve your experience. We'll be back shortly! Thank you for your patience.",
+  estimatedTime: ""
+};
+
 function generateId() {
   return crypto.randomBytes(4).toString('hex');
 }
@@ -20,6 +28,37 @@ function escapeHtml(text) {
     "'": '&#039;'
   };
   return text ? text.replace(/[&<>"']/g, (m) => map[m]) : '';
+}
+
+// Middleware to check maintenance mode
+function checkMaintenanceMode(req, res, next) {
+  // Allow admin endpoints and maintenance page
+  if (req.path === '/admin.html' || 
+      req.path === '/maintenance.html' || 
+      req.path === '/maintenance-preview' ||
+      req.path.startsWith('/api/maintenance') ||
+      req.path.startsWith('/css/') ||
+      req.path.startsWith('/js/') ||
+      req.path.startsWith('/assets/')) {
+    return next();
+  }
+
+  if (maintenanceSettings.enabled) {
+    // For API endpoints, return JSON response
+    if (req.path.startsWith('/api/')) {
+      return res.status(503).json({
+        error: 'Service temporarily unavailable',
+        message: maintenanceSettings.message,
+        maintenanceMode: true,
+        estimatedTime: maintenanceSettings.estimatedTime
+      });
+    }
+    
+    // For regular pages, redirect to maintenance page
+    return res.redirect('/maintenance.html');
+  }
+  
+  next();
 }
 
 mongoose.connect('mongodb+srv://lajegix672:KaXY8RqzIcJ31Nyo@goatmart.9p854kx.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
@@ -75,6 +114,9 @@ const Item = mongoose.model('Item', itemSchema);
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Apply maintenance mode check to all routes
+app.use(checkMaintenanceMode);
+
 // Request tracking middleware
 app.use(async (req, res, next) => {
   try {
@@ -88,6 +130,49 @@ app.use(async (req, res, next) => {
   } catch (error) {
     next();
   }
+});
+
+// Maintenance API endpoints
+app.get('/api/maintenance', (req, res) => {
+  res.json(maintenanceSettings);
+});
+
+app.post('/api/maintenance', (req, res) => {
+  const { enabled, title, message, estimatedTime } = req.body;
+  
+  // Basic validation
+  if (typeof enabled !== 'boolean') {
+    return res.status(400).json({ error: 'Invalid enabled value' });
+  }
+  
+  if (title && typeof title !== 'string') {
+    return res.status(400).json({ error: 'Invalid title' });
+  }
+  
+  if (message && typeof message !== 'string') {
+    return res.status(400).json({ error: 'Invalid message' });
+  }
+
+  // Update settings
+  maintenanceSettings = {
+    enabled,
+    title: title || maintenanceSettings.title,
+    message: message || maintenanceSettings.message,
+    estimatedTime: estimatedTime || ""
+  };
+
+  console.log(`Maintenance mode ${enabled ? 'enabled' : 'disabled'} by admin`);
+  
+  res.json({ 
+    success: true, 
+    message: 'Maintenance settings updated',
+    settings: maintenanceSettings 
+  });
+});
+
+// Maintenance preview endpoint
+app.get('/maintenance-preview', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'maintenance.html'));
 });
 
 app.get('/', (req, res) => {

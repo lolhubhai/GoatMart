@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - GoatMart</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 24px;
+        }
+        
+        .admin-card {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 32px;
+            box-shadow: var(--elevation-2);
+            margin-bottom: 24px;
+        }
+        
+        .admin-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--outline-variant);
+        }
+        
+        .admin-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .maintenance-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: var(--background);
+            border-radius: var(--radius-medium);
+            margin-bottom: 24px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--error);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-small);
+            font-size: 16px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--on-surface);
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-online {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .status-maintenance {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .maintenance-preview {
+            background: var(--background);
+            border-radius: var(--radius-medium);
+            padding: 20px;
+            margin-top: 16px;
+            border: 1px solid var(--outline-variant);
+        }
+        
+        .preview-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--on-surface);
+            margin-bottom: 12px;
+        }
+        
+        .preview-content {
+            font-size: 16px;
+            color: var(--on-surface);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-app-bar">
+        <div class="app-bar-content">
+            <div class="app-bar-title">
+                <div class="app-icon">
+                    <i class="material-icons">admin_panel_settings</i>
+                </div>
+                <div>
+                    <div class="app-title">Admin Panel</div>
+                    <div class="app-subtitle">Maintenance Management</div>
+                </div>
+            </div>
+            <div class="app-bar-actions">
+                <a href="index.html" class="btn btn-outlined">
+                    <i class="material-icons" style="font-size: 18px;">home</i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-card">
+            <div class="admin-header">
+                <div class="admin-icon">
+                    <i class="material-icons">settings</i>
+                </div>
+                <div>
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 500;">Maintenance Mode</h1>
+                    <p style="margin: 4px 0 0; color: var(--on-surface); opacity: 0.7;">
+                        Control website availability and display custom messages
+                    </p>
+                </div>
+            </div>
+
+            <div class="maintenance-toggle">
+                <div>
+                    <div style="font-weight: 500; margin-bottom: 4px;">Website Status</div>
+                    <div id="statusIndicator" class="status-indicator status-online">
+                        <i class="material-icons" style="font-size: 16px;">check_circle</i>
+                        Online
+                    </div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="maintenanceToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <form id="maintenanceForm">
+                <div class="form-group">
+                    <label class="form-label" for="maintenanceTitle">
+                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">title</i>
+                        Maintenance Title
+                    </label>
+                    <input 
+                        type="text" 
+                        id="maintenanceTitle" 
+                        class="form-input"
+                        placeholder="Website Under Maintenance"
+                        value="🚧 Website Under Maintenance"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="maintenanceMessage">
+                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">message</i>
+                        Maintenance Message
+                    </label>
+                    <textarea 
+                        id="maintenanceMessage" 
+                        class="form-textarea"
+                        placeholder="Enter your maintenance message here..."
+                    >We're currently performing scheduled maintenance to improve your experience. We'll be back shortly! Thank you for your patience.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="estimatedTime">
+                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">schedule</i>
+                        Estimated Time (Optional)
+                    </label>
+                    <input 
+                        type="text" 
+                        id="estimatedTime" 
+                        class="form-input"
+                        placeholder="e.g., 2 hours, 30 minutes, etc."
+                    >
+                </div>
+
+                <div class="maintenance-preview">
+                    <div class="preview-title">
+                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 16px;">preview</i>
+                        Preview
+                    </div>
+                    <div id="previewContent" class="preview-content">
+                        <strong>🚧 Website Under Maintenance</strong><br><br>
+                        We're currently performing scheduled maintenance to improve your experience. We'll be back shortly! Thank you for your patience.
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-contained">
+                        <i class="material-icons" style="font-size: 18px;">save</i>
+                        Save Settings
+                    </button>
+                    <button type="button" id="previewBtn" class="btn btn-outlined">
+                        <i class="material-icons" style="font-size: 18px;">visibility</i>
+                        Preview Page
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentSettings = {
+            enabled: false,
+            title: "🚧 Website Under Maintenance",
+            message: "We're currently performing scheduled maintenance to improve your experience. We'll be back shortly! Thank you for your patience.",
+            estimatedTime: ""
+        };
+
+        // Load current settings
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/maintenance');
+                if (response.ok) {
+                    currentSettings = await response.json();
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Update UI with current settings
+        function updateUI() {
+            document.getElementById('maintenanceToggle').checked = currentSettings.enabled;
+            document.getElementById('maintenanceTitle').value = currentSettings.title;
+            document.getElementById('maintenanceMessage').value = currentSettings.message;
+            document.getElementById('estimatedTime').value = currentSettings.estimatedTime || '';
+            
+            updateStatusIndicator();
+            updatePreview();
+        }
+
+        // Update status indicator
+        function updateStatusIndicator() {
+            const indicator = document.getElementById('statusIndicator');
+            if (currentSettings.enabled) {
+                indicator.className = 'status-indicator status-maintenance';
+                indicator.innerHTML = '<i class="material-icons" style="font-size: 16px;">warning</i>Maintenance Mode';
+            } else {
+                indicator.className = 'status-indicator status-online';
+                indicator.innerHTML = '<i class="material-icons" style="font-size: 16px;">check_circle</i>Online';
+            }
+        }
+
+        // Update preview
+        function updatePreview() {
+            const title = document.getElementById('maintenanceTitle').value;
+            const message = document.getElementById('maintenanceMessage').value;
+            const time = document.getElementById('estimatedTime').value;
+            
+            let preview = `<strong>${title}</strong><br><br>${message}`;
+            if (time) {
+                preview += `<br><br><em>Estimated time: ${time}</em>`;
+            }
+            
+            document.getElementById('previewContent').innerHTML = preview;
+        }
+
+        // Save settings
+        async function saveSettings() {
+            const settings = {
+                enabled: document.getElementById('maintenanceToggle').checked,
+                title: document.getElementById('maintenanceTitle').value,
+                message: document.getElementById('maintenanceMessage').value,
+                estimatedTime: document.getElementById('estimatedTime').value
+            };
+
+            try {
+                const response = await fetch('/api/maintenance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    currentSettings = settings;
+                    updateStatusIndicator();
+                    showNotification('Settings saved successfully!', 'success');
+                } else {
+                    showNotification('Error saving settings', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showNotification('Error saving settings', 'error');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 16px;
+                background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: var(--radius-medium);
+                font-weight: 500;
+                z-index: 1001;
+                transform: translateX(300px);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: var(--elevation-3);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+            notification.innerHTML = `
+                <i class="material-icons" style="font-size: 20px;">${type === 'error' ? 'error' : 'check_circle'}</i>
+                ${message}
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+            setTimeout(() => {
+                notification.style.transform = 'translateX(300px)';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('maintenanceToggle').addEventListener('change', updateStatusIndicator);
+        document.getElementById('maintenanceTitle').addEventListener('input', updatePreview);
+        document.getElementById('maintenanceMessage').addEventListener('input', updatePreview);
+        document.getElementById('estimatedTime').addEventListener('input', updatePreview);
+
+        document.getElementById('maintenanceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveSettings();
+        });
+
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            window.open('/maintenance-preview', '_blank');
+        });
+
+        // Initialize
+        loadSettings();
+    </script>
+</body>
+</html>
