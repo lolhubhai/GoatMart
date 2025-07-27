@@ -11,6 +11,17 @@ function generateId() {
   return crypto.randomBytes(4).toString('hex');
 }
 
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text ? text.replace(/[&<>"']/g, (m) => map[m]) : '';
+}
+
 mongoose.connect('mongodb+srv://lajegix672:KaXY8RqzIcJ31Nyo@goatmart.9p854kx.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
@@ -468,9 +479,50 @@ app.get('/api/item/:itemId', async (req, res) => {
   }
 });
 
-// Add route for viewing by unique shortId
-app.get('/view/:shortId', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'view.html'));
+// Add route for viewing by unique shortId with dynamic meta tags
+app.get('/view/:shortId', async (req, res) => {
+  try {
+    const shortId = req.params.shortId;
+    const item = await Item.findOne({ shortId });
+    
+    if (!item) {
+      return res.sendFile(path.join(__dirname, 'public', 'view.html'));
+    }
+    
+    // Read the view.html file
+    const fs = require('fs');
+    let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
+    
+    // Replace meta tags with dynamic content
+    const title = `${item.itemName} - GoatMart`;
+    const description = item.description || 'Amazing bot command shared on GoatMart';
+    const url = `${req.protocol}://${req.get('host')}/view/${shortId}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/assets/logo.png`;
+    
+    html = html.replace('<meta property="og:title" content="GoatMart - Bot Commands">', 
+                       `<meta property="og:title" content="${escapeHtml(title)}">`);
+    html = html.replace('<meta property="og:description" content="Discover and share amazing bot commands">', 
+                       `<meta property="og:description" content="${escapeHtml(description)}">`);
+    html = html.replace('<meta property="og:url" content="">', 
+                       `<meta property="og:url" content="${url}">`);
+    html = html.replace('<meta property="og:image" content="/assets/logo.png">', 
+                       `<meta property="og:image" content="${imageUrl}">`);
+    
+    html = html.replace('<meta name="twitter:title" content="GoatMart - Bot Commands">', 
+                       `<meta name="twitter:title" content="${escapeHtml(title)}">`);
+    html = html.replace('<meta name="twitter:description" content="Discover and share amazing bot commands">', 
+                       `<meta name="twitter:description" content="${escapeHtml(description)}">`);
+    html = html.replace('<meta name="twitter:image" content="/assets/logo.png">', 
+                       `<meta name="twitter:image" content="${imageUrl}">`);
+    
+    html = html.replace('<title>View Command - GoatMart</title>', 
+                       `<title>${escapeHtml(title)}</title>`);
+    
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving view page:', error);
+    res.sendFile(path.join(__dirname, 'public', 'view.html'));
+  }
 });
 
 // API endpoint for getting command by shortId

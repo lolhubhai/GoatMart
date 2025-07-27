@@ -12,6 +12,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
+    <!-- Open Graph Meta Tags for Link Sharing -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="GoatMart">
+    <meta property="og:title" content="GoatMart - Bot Commands">
+    <meta property="og:description" content="Discover and share amazing bot commands">
+    <meta property="og:image" content="/assets/logo.png">
+    <meta property="og:url" content="">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@GoatMart">
+    <meta name="twitter:title" content="GoatMart - Bot Commands">
+    <meta name="twitter:description" content="Discover and share amazing bot commands">
+    <meta name="twitter:image" content="/assets/logo.png">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -487,6 +502,9 @@
             const container = document.getElementById('contentContainer');
             const rawLink = command.rawLink || `${window.location.origin}/raw/${command.shortId}`;
             
+            // Update meta tags for better link sharing
+            updateMetaTags(command);
+            
             container.innerHTML = `
                 <!-- Command Header -->
                 <div class="command-header-card">
@@ -581,6 +599,33 @@
             
             // Update page title
             document.title = `${command.itemName} - GoatMart`;
+        }
+
+        function updateMetaTags(command) {
+            const title = `${command.itemName} - GoatMart`;
+            const description = command.description || 'Amazing bot command shared on GoatMart';
+            const url = window.location.href;
+            const imageUrl = `${window.location.origin}/assets/logo.png`;
+            
+            // Update Open Graph meta tags
+            document.querySelector('meta[property="og:title"]').content = title;
+            document.querySelector('meta[property="og:description"]').content = description;
+            document.querySelector('meta[property="og:url"]').content = url;
+            document.querySelector('meta[property="og:image"]').content = imageUrl;
+            
+            // Update Twitter Card meta tags
+            document.querySelector('meta[name="twitter:title"]').content = title;
+            document.querySelector('meta[name="twitter:description"]').content = description;
+            document.querySelector('meta[name="twitter:image"]').content = imageUrl;
+            
+            // Update regular meta description
+            let metaDescription = document.querySelector('meta[name="description"]');
+            if (!metaDescription) {
+                metaDescription = document.createElement('meta');
+                metaDescription.name = 'description';
+                document.head.appendChild(metaDescription);
+            }
+            metaDescription.content = description;
         }
 
         function showError(message) {
