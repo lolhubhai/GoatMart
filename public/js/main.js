@@ -1,4 +1,4 @@
-'error't file for GoatMart with Android UI integration
+// Main JavaScript file for GoatMart with Android UI integration
 class GoatMartApp {
     constructor() {
         this.currentPage = 1;
@@ -29,7 +29,7 @@ class GoatMartApp {
         // Global error handler
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.error);
-            this.showNotification('🫠❤️‍🩹');
+            this.showNotification('An error occurred. Please try again.', 'error');
         });
 
         // Online/offline status
