@@ -1,12 +1,9 @@
 // Main JavaScript file for GoatMart with Android UI integration
 class GoatMartApp {
     constructor() {
-        this.currentPage = 1;
         this.currentSearch = '';
         this.currentType = 'all';
         this.isLoading = false;
-        this.hasMoreData = true;
-        this.intersectionObserver = null;
         this.init();
     }
 
@@ -81,8 +78,7 @@ class GoatMartApp {
         if (searchInput) {
             searchInput.addEventListener('input', this.debounce((e) => {
                 this.currentSearch = e.target.value;
-                this.currentPage = 1;
-                this.loadCommands(this.currentSearch, this.currentType, 1, false);
+                this.loadCommands(this.currentSearch, this.currentType);
             }, 300));
         }
 
@@ -93,8 +89,7 @@ class GoatMartApp {
                 chips.forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 this.currentType = chip.dataset.type;
-                this.currentPage = 1;
-                this.loadCommands(this.currentSearch, this.currentType, 1, false);
+                this.loadCommands(this.currentSearch, this.currentType);
             });
         });
     }
@@ -419,127 +414,53 @@ class GoatMartApp {
         requestAnimationFrame(animate);
     }
 
-    async loadCommands(search = '', type = 'all', page = 1, append = false) {
+    async loadCommands(search = '', type = 'all') {
         const container = document.getElementById('commandsContainer');
 
         // Initialize loading states
-        this.currentPage = page;
         this.currentSearch = search;
         this.currentType = type;
         this.isLoading = true;
 
-        if (!append) {
-            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Loading amazing commands...</div></div>';
-        } else {
-            // Add loading indicator for infinite scroll
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'infinite-loading';
-            loadingDiv.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading more commands...</div>';
-            loadingDiv.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 32px 16px;';
-            container.appendChild(loadingDiv);
-        }
+        container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Loading all commands...</div></div>';
 
         try {
             const params = new URLSearchParams();
             if (search) params.append('search', search);
             if (type !== 'all') params.append('category', type);
-            params.append('limit', '12');
-            params.append('page', page.toString());
+            // Remove limit to get all commands
+            params.append('limit', '1000'); // Set high limit to get all commands
 
             const response = await fetch(`/api/items?${params}`);
             const data = await response.json();
 
-            // Remove loading indicators
-            if (append) {
-                const loadingDiv = container.querySelector('.infinite-loading');
-                if (loadingDiv) loadingDiv.remove();
-            }
-
             if (data.items && data.items.length > 0) {
                 const commandCards = data.items.map(command => this.createCommandCard(command)).join('');
-
-                if (append) {
-                    container.insertAdjacentHTML('beforeend', commandCards);
-                } else {
-                    container.innerHTML = commandCards;
-                }
-
-                // Check if there are more items to load
-                this.hasMoreData = data.items.length === 12 && (page * 12) < data.total;
-
-                // Setup intersection observer for infinite scrolling
-                if (!append) {
-                    this.setupInfiniteScrolling();
-                }
-            } else {
-                if (!append) {
-                    container.innerHTML = `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
-                            <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
-                            <h3 style="margin-bottom: 8px; font-weight: 400;">No commands found</h3>
-                            <p>Try adjusting your search terms or filters</p>
-                        </div>
-                    `;
-                }
-                this.hasMoreData = false;
-            }
-        } catch (error) {
-            console.error('Error loading commands:', error);
-
-            // Remove loading indicators
-            if (append) {
-                const loadingDiv = container.querySelector('.infinite-loading');
-                if (loadingDiv) loadingDiv.remove();
+                container.innerHTML = commandCards;
             } else {
                 container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
-                        <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
-                        <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
-                        <p>Please try again later</p>
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
+                        <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
+                        <h3 style="margin-bottom: 8px; font-weight: 400;">No commands found</h3>
+                        <p>Try adjusting your search terms or filters</p>
                     </div>
                 `;
             }
-            this.hasMoreData = false;
+        } catch (error) {
+            console.error('Error loading commands:', error);
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
+                    <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
+                    <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
+                    <p>Please try again later</p>
+                </div>
+            `;
         }
 
         this.isLoading = false;
     }
 
-    setupInfiniteScrolling() {
-        // Remove existing observer if any
-        if (this.intersectionObserver) {
-            this.intersectionObserver.disconnect();
-        }
-
-        // Create a sentinel element at the bottom of the container
-        const container = document.getElementById('commandsContainer');
-        const sentinel = document.createElement('div');
-        sentinel.className = 'scroll-sentinel';
-        sentinel.style.cssText = 'height: 10px; grid-column: 1 / -1;';
-        container.appendChild(sentinel);
-
-        // Create intersection observer
-        this.intersectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !this.isLoading && this.hasMoreData) {
-                    this.loadMoreCommands();
-                }
-            });
-        }, {
-            root: null,
-            rootMargin: '100px',
-            threshold: 0.1
-        });
-
-        this.intersectionObserver.observe(sentinel);
-    }
-
-    async loadMoreCommands() {
-        if (this.isLoading || !this.hasMoreData) return;
-
-        this.currentPage++;
-        await this.loadCommands(this.currentSearch, this.currentType, this.currentPage, true);
-    }
+    
 
     createCommandCard(command) {
         const truncateDescription = (text, maxLength = 120) => {
@@ -812,24 +733,6 @@ style.textContent = `
     opacity: 0.8;
   }
 
-  .infinite-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 16px;
-    color: var(--on-surface);
-    opacity: 0.7;
-  }
-
-  .infinite-loading .loading-spinner {
-    width: 24px;
-    height: 24px;
-    border-width: 3px;
-    margin-bottom: 8px;
-  }
-
-  .infinite-loading .loading-text {
-    font-size: 14px;
-  }
+  
 `;
 document.head.appendChild(style);

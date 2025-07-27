@@ -1,4 +1,3 @@
-
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -129,7 +128,7 @@ app.get('/api/stats', async (req, res) => {
     const memoryUsage = process.memoryUsage();
     const mongoStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
     const responseTime = stats.averageResponseTime || 0;
-    
+
     const os = require('os');
     const osUtils = {
       arch: process.arch,
@@ -224,42 +223,73 @@ app.get('/api/trending', async (req, res) => {
   }
 });
 
+// Get items with pagination
 app.get('/api/items', async (req, res) => {
   try {
-    const { category, sort, search, page = 1, limit = 12 } = req.query;
-    const skip = (page - 1) * parseInt(limit);
+    const {
+      search = '',
+      category = 'all',
+      limit = 1000, // Default to high limit to show all commands
+      page = 1,
+      sort = 'newest'
+    } = req.query;
+
+    // Build query
     let query = {};
 
-    if (category) query.category = category;
     if (search) {
       query.$or = [
         { itemName: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
+        { authorName: { $regex: search, $options: 'i' } }
       ];
     }
 
-    let sortQuery = {};
-    switch (sort) {
-      case 'popular': sortQuery = { views: -1 }; break;
-      case 'likes': sortQuery = { likes: -1 }; break;
-      default: sortQuery = { createdAt: -1 };
+    if (category && category !== 'all') {
+      query.type = category;
     }
 
+    // Build sort
+    let sortObj = {};
+    switch (sort) {
+      case 'popular':
+        sortObj = { likes: -1, createdAt: -1 };
+        break;
+      case 'oldest':
+        sortObj = { createdAt: 1 };
+        break;
+      case 'newest':
+      default:
+        sortObj = { createdAt: -1 };
+        break;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = parseInt(limit);
+
     const items = await Item.find(query)
-      .sort(sortQuery)
+      .sort(sortObj)
       .skip(skip)
       .limit(parseInt(limit));
 
     const itemsWithRawLinks = items.map(item => ({
-      ...item.toObject(),
+      ...items.toObject(),
       code: undefined,
       rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`
     }));
 
     const total = await Item.countDocuments(query);
-    res.json({ items: itemsWithRawLinks, total });
+
+    res.json({
+      items: itemsWithRawLinks,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limitNum),
+      hasMore: skip + limitNum < total
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching items' });
+    console.error('Error fetching items:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -371,13 +401,13 @@ app.delete('/api/items/:id', async (req, res) => {
   try {
     const itemID = parseInt(req.params.id);
     const item = await Item.findOne({ itemID });
-    
+
     if (!item) {
       return res.status(404).json({ error: 'Command not found' });
     }
-    
+
     await Item.deleteOne({ itemID });
-    
+
     // Update stats if needed
     try {
       let stats = await Stats.findOne();
@@ -388,7 +418,7 @@ app.delete('/api/items/:id', async (req, res) => {
     } catch (error) {
       console.error('Error updating stats:', error);
     }
-    
+
     res.json({ 
       success: true, 
       message: 'Command deleted successfully',
