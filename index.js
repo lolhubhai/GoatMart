@@ -15,6 +15,15 @@ let maintenanceSettings = {
   estimatedTime: ""
 };
 
+// Admin credentials
+const adminCredentials = {
+  username: "aryan788",
+  password: "Aryan@009"
+};
+
+// Admin sessions (in production, use proper session management)
+const adminSessions = new Map();
+
 function generateId() {
   return crypto.randomBytes(4).toString('hex');
 }
@@ -30,13 +39,35 @@ function escapeHtml(text) {
   return text ? text.replace(/[&<>"']/g, (m) => map[m]) : '';
 }
 
+// Middleware to verify admin token
+function verifyAdminToken(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '') || 
+                req.query.token || 
+                req.body.token;
+  
+  if (!token || !adminSessions.has(token)) {
+    return res.status(401).json({ error: 'Unauthorized access' });
+  }
+  
+  const session = adminSessions.get(token);
+  if (session.expires < Date.now()) {
+    adminSessions.delete(token);
+    return res.status(401).json({ error: 'Session expired' });
+  }
+  
+  req.admin = session.user;
+  next();
+}
+
 // Middleware to check maintenance mode
 function checkMaintenanceMode(req, res, next) {
   // Allow admin endpoints and maintenance page
   if (req.path === '/admin.html' || 
+      req.path === '/admin-login.html' ||
       req.path === '/maintenance.html' || 
       req.path === '/maintenance-preview' ||
       req.path.startsWith('/api/maintenance') ||
+      req.path.startsWith('/api/admin') ||
       req.path.startsWith('/css/') ||
       req.path.startsWith('/js/') ||
       req.path.startsWith('/assets/')) {
@@ -132,12 +163,50 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Admin login endpoint
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  
+  if (username === adminCredentials.username && password === adminCredentials.password) {
+    // Generate session token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+    
+    adminSessions.set(token, {
+      user: { username: adminCredentials.username },
+      expires: expires
+    });
+    
+    res.json({
+      success: true,
+      token: token,
+      user: { username: adminCredentials.username },
+      message: 'Login successful'
+    });
+  } else {
+    res.status(401).json({ error: 'Invalid username or password' });
+  }
+});
+
+// Admin logout endpoint
+app.post('/api/admin/logout', verifyAdminToken, (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '') || 
+                req.query.token || 
+                req.body.token;
+  
+  if (token) {
+    adminSessions.delete(token);
+  }
+  
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
 // Maintenance API endpoints
 app.get('/api/maintenance', (req, res) => {
   res.json(maintenanceSettings);
 });
 
-app.post('/api/maintenance', (req, res) => {
+app.post('/api/maintenance', verifyAdminToken, (req, res) => {
   const { enabled, title, message, estimatedTime } = req.body;
   
   // Basic validation
@@ -161,7 +230,7 @@ app.post('/api/maintenance', (req, res) => {
     estimatedTime: estimatedTime || ""
   };
 
-  console.log(`Maintenance mode ${enabled ? 'enabled' : 'disabled'} by admin`);
+  console.log(`Maintenance mode ${enabled ? 'enabled' : 'disabled'} by admin: ${req.admin.username}`);
   
   res.json({ 
     success: true, 
@@ -177,6 +246,16 @@ app.get('/maintenance-preview', (req, res) => {
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Admin panel route (protected)
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Admin login page
+app.get('/admin-login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
 
 app.get('/api/stats', async (req, res) => {

@@ -193,6 +193,10 @@
                 </div>
             </div>
             <div class="app-bar-actions">
+                <button onclick="logout()" class="btn btn-outlined" style="margin-right: 12px;">
+                    <i class="material-icons" style="font-size: 18px;">logout</i>
+                    Logout
+                </button>
                 <a href="index.html" class="btn btn-outlined">
                     <i class="material-icons" style="font-size: 18px;">home</i>
                     Back to Home
@@ -305,10 +309,17 @@
         // Load current settings
         async function loadSettings() {
             try {
-                const response = await fetch('/api/maintenance');
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/maintenance', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (response.ok) {
                     currentSettings = await response.json();
                     updateUI();
+                } else if (response.status === 401) {
+                    logout();
                 }
             } catch (error) {
                 console.error('Error loading settings:', error);
@@ -362,10 +373,12 @@
             };
 
             try {
+                const token = localStorage.getItem('admin_token');
                 const response = await fetch('/api/maintenance', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(settings)
                 });
@@ -374,6 +387,8 @@
                     currentSettings = settings;
                     updateStatusIndicator();
                     showNotification('Settings saved successfully!', 'success');
+                } else if (response.status === 401) {
+                    logout();
                 } else {
                     showNotification('Error saving settings', 'error');
                 }
@@ -431,8 +446,40 @@
             window.open('/maintenance-preview', '_blank');
         });
 
+        // Check authentication on page load
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin-login';
+                return false;
+            }
+            return true;
+        }
+
+        // Logout function
+        function logout() {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                fetch('/api/admin/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }).finally(() => {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    window.location.href = '/admin-login';
+                });
+            } else {
+                window.location.href = '/admin-login';
+            }
+        }
+
         // Initialize
-        loadSettings();
+        if (checkAuth()) {
+            loadSettings();
+        }
     </script>
 </body>
 </html>
