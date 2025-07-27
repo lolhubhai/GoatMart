@@ -264,6 +264,40 @@
 
         // Check every 30 seconds if maintenance is still active
         setInterval(checkMaintenanceStatus, 30000);
+
+        // Add page visibility API to pause checking when tab is not active
+        let isPageVisible = true;
+        document.addEventListener('visibilitychange', function() {
+            isPageVisible = !document.hidden;
+        });
+
+        // Only check status if page is visible
+        setInterval(() => {
+            if (isPageVisible) {
+                checkMaintenanceStatus();
+            }
+        }, 30000);
+
+        // Show last update time
+        function updateLastChecked() {
+            const lastChecked = document.querySelector('.last-checked');
+            if (!lastChecked) {
+                const container = document.querySelector('.maintenance-container');
+                const lastCheckedDiv = document.createElement('div');
+                lastCheckedDiv.className = 'last-checked';
+                lastCheckedDiv.style.cssText = 'margin-top: 20px; font-size: 12px; opacity: 0.7;';
+                container.appendChild(lastCheckedDiv);
+            }
+            document.querySelector('.last-checked').textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // Update on load and every check
+        updateLastChecked();
+        const originalCheck = checkMaintenanceStatus;
+        checkMaintenanceStatus = function() {
+            updateLastChecked();
+            return originalCheck();
+        };
     </script>
 </body>
 </html>

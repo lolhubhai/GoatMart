@@ -61,31 +61,60 @@ function verifyAdminToken(req, res, next) {
 
 // Middleware to check maintenance mode
 function checkMaintenanceMode(req, res, next) {
-  // Allow admin endpoints and maintenance page
-  if (req.path === '/admin.html' || 
-      req.path === '/admin-login.html' ||
-      req.path === '/maintenance.html' || 
-      req.path === '/maintenance-preview' ||
-      req.path.startsWith('/api/maintenance') ||
-      req.path.startsWith('/api/admin') ||
-      req.path.startsWith('/css/') ||
-      req.path.startsWith('/js/') ||
-      req.path.startsWith('/assets/')) {
+  // Always allow these paths regardless of maintenance mode
+  const allowedPaths = [
+    '/admin.html',
+    '/admin-login.html', 
+    '/admin-login',
+    '/maintenance.html',
+    '/maintenance-preview'
+  ];
+  
+  const allowedPrefixes = [
+    '/api/maintenance',
+    '/api/admin',
+    '/css/',
+    '/js/',
+    '/assets/'
+  ];
+
+  // Check if path is explicitly allowed
+  if (allowedPaths.includes(req.path)) {
+    return next();
+  }
+
+  // Check if path starts with allowed prefixes
+  if (allowedPrefixes.some(prefix => req.path.startsWith(prefix))) {
     return next();
   }
 
   if (maintenanceSettings.enabled) {
+    // Block all HTML pages and redirect to maintenance
+    const blockedPages = [
+      '/',
+      '/index.html',
+      '/upload.html', 
+      '/view.html',
+      '/paste.html',
+      '/delete.html'
+    ];
+    
+    if (blockedPages.includes(req.path) || req.path.endsWith('.html')) {
+      return res.redirect('/maintenance.html');
+    }
+    
     // For API endpoints, return JSON response
     if (req.path.startsWith('/api/')) {
       return res.status(503).json({
         error: 'Service temporarily unavailable',
         message: maintenanceSettings.message,
         maintenanceMode: true,
-        estimatedTime: maintenanceSettings.estimatedTime
+        estimatedTime: maintenanceSettings.estimatedTime,
+        title: maintenanceSettings.title
       });
     }
     
-    // For regular pages, redirect to maintenance page
+    // For all other requests during maintenance, redirect to maintenance page
     return res.redirect('/maintenance.html');
   }
   

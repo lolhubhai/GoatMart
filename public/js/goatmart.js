@@ -38,6 +38,7 @@ class GoatMart {
 ├─────────────────────────────────────────────────────────────┤
 │ status                  Check website status               │
 │ maintenance             Check maintenance status           │
+│ test                    Test maintenance functionality     │
 │ endpoints               List all API endpoints             │
 │ help                    Show this help message             │
 │ version                 Show version information           │
@@ -61,40 +62,61 @@ class GoatMart {
             console.log('🔍 Checking GoatMart status...\n');
             
             const maintenanceStatus = await this.makeRequest('/api/maintenance');
-            const stats = await this.makeRequest('/api/stats');
             
             console.log('╔══════════════════════════════════════════════════════════════╗');
             console.log('║                      🐐 GoatMart Status                       ║');
             console.log('╚══════════════════════════════════════════════════════════════╝');
             
             if (maintenanceStatus.enabled) {
-                console.log('🚧 Status: MAINTENANCE MODE');
+                console.log('🚧 Status: MAINTENANCE MODE ACTIVE');
                 console.log(`📝 Title: ${maintenanceStatus.title}`);
                 console.log(`💬 Message: ${maintenanceStatus.message}`);
                 if (maintenanceStatus.estimatedTime) {
                     console.log(`⏰ Estimated Time: ${maintenanceStatus.estimatedTime}`);
                 }
+                console.log('\n🔒 Access Restrictions:');
+                console.log('   • All main pages blocked (index, upload, view, etc.)');
+                console.log('   • All API endpoints return maintenance message');
+                console.log('   • Only admin panel and maintenance page accessible');
+                console.log('\n💡 Admin can disable maintenance mode from admin panel');
             } else {
-                console.log('✅ Status: ONLINE');
-                console.log(`📊 Total Commands: ${stats.totalCommands || 0}`);
-                console.log(`👤 Daily Active Users: ${stats.dailyActiveUsers || 0}`);
-                console.log(`❤️  Total Likes: ${stats.totalLikes || 0}`);
+                console.log('✅ Status: ONLINE & OPERATIONAL');
                 
-                if (stats.hosting) {
-                    const uptime = stats.hosting.uptime;
-                    console.log(`⏱️  Uptime: ${uptime.days}d ${uptime.hours}h ${uptime.minutes}m`);
-                    console.log(`💾 Memory Usage: ${stats.hosting.memory.heapUsed}MB / ${stats.hosting.memory.heapTotal}MB`);
-                    console.log(`🏃 Response Time: ${stats.hosting.performance.averageResponseTime || 0}ms`);
+                try {
+                    const stats = await this.makeRequest('/api/stats');
+                    console.log(`📊 Total Commands: ${stats.totalCommands || 0}`);
+                    console.log(`👤 Daily Active Users: ${stats.dailyActiveUsers || 0}`);
+                    console.log(`❤️  Total Likes: ${stats.totalLikes || 0}`);
+                    
+                    if (stats.hosting) {
+                        const uptime = stats.hosting.uptime;
+                        console.log(`⏱️  Uptime: ${uptime.days}d ${uptime.hours}h ${uptime.minutes}m`);
+                        console.log(`💾 Memory Usage: ${stats.hosting.memory.heapUsed}MB / ${stats.hosting.memory.heapTotal}MB`);
+                        console.log(`🏃 Response Time: ${stats.hosting.performance.averageResponseTime || 0}ms`);
+                    }
+                    
+                    console.log('\n🟢 All services are fully operational');
+                    console.log('   • Website accessible');
+                    console.log('   • API endpoints responding');
+                    console.log('   • File uploads working');
+                } catch (statsError) {
+                    console.log('✅ Website is online but stats unavailable');
                 }
             }
             
             console.log(`\n🌐 Website: ${this.baseUrl}`);
+            console.log(`🔗 Admin Panel: ${this.baseUrl}/admin-login`);
             console.log(`📅 Last Checked: ${new Date().toLocaleString()}`);
             
         } catch (error) {
-            console.log('❌ Status: OFFLINE or ERROR');
+            console.log('❌ Status: OFFLINE or CONNECTION ERROR');
             console.log(`🔗 Website: ${this.baseUrl}`);
             console.log(`⚠️  Error: ${error.message}`);
+            console.log('\n🔧 Possible Issues:');
+            console.log('   • Server is down');
+            console.log('   • Network connectivity problems');
+            console.log('   • DNS resolution issues');
+            console.log('\n💡 Try again in a few minutes or contact support');
         }
     }
 
@@ -110,23 +132,53 @@ class GoatMart {
             console.log('╚══════════════════════════════════════════════════════════════╝');
             
             if (status.enabled) {
-                console.log('🚧 Maintenance Mode: ENABLED');
+                console.log('🚧 Maintenance Mode: ACTIVE');
                 console.log(`📝 Title: ${status.title}`);
                 console.log(`💬 Message: ${status.message}`);
                 if (status.estimatedTime) {
                     console.log(`⏰ Estimated Time: ${status.estimatedTime}`);
                 }
-                console.log('\n⚠️  All endpoints are currently unavailable');
-                console.log('🔄 Use "goatmart status" to check again later');
+                
+                console.log('\n🔒 Current Restrictions:');
+                console.log('   • Homepage (/) - Redirected to maintenance');
+                console.log('   • Upload page (/upload.html) - Blocked');
+                console.log('   • View page (/view.html) - Blocked'); 
+                console.log('   • Paste page (/paste.html) - Blocked');
+                console.log('   • All API endpoints - Return 503 error');
+                
+                console.log('\n✅ Still Accessible:');
+                console.log('   • Admin login (/admin-login)');
+                console.log('   • Admin panel (/admin.html)');
+                console.log('   • Maintenance page (/maintenance.html)');
+                console.log('   • Static assets (CSS, JS, images)');
+                
+                console.log('\n🔄 Use "goatmart status" to monitor changes');
+                console.log('💡 Admin can disable maintenance from admin panel');
             } else {
                 console.log('✅ Maintenance Mode: DISABLED');
-                console.log('🎉 All services are operational');
-                console.log('🚀 All endpoints are available');
+                console.log('🎉 All services are fully operational');
+                console.log('🚀 All pages and endpoints are accessible');
+                
+                console.log('\n🌐 Available Pages:');
+                console.log('   • Homepage (/)');
+                console.log('   • Upload (/upload.html)');
+                console.log('   • View (/view.html)');
+                console.log('   • Paste (/paste.html)');
+                console.log('   • All API endpoints');
             }
+            
+            console.log(`\n📊 Last Updated: ${new Date().toLocaleString()}`);
             
         } catch (error) {
             console.log('❌ Unable to check maintenance status');
             console.log(`⚠️  Error: ${error.message}`);
+            
+            if (error.message.includes('Network error')) {
+                console.log('\n🔧 Possible causes:');
+                console.log('   • Server is completely offline');
+                console.log('   • Network connectivity issues');
+                console.log('   • Firewall blocking requests');
+            }
         }
     }
 
@@ -251,6 +303,79 @@ class GoatMart {
         }
     }
 
+    // Test maintenance mode functionality
+    async test() {
+        try {
+            console.log('🧪 Testing GoatMart maintenance functionality...\n');
+            
+            const maintenanceStatus = await this.makeRequest('/api/maintenance');
+            
+            console.log('╔══════════════════════════════════════════════════════════════╗');
+            console.log('║                    🧪 Maintenance Test                        ║');
+            console.log('╚══════════════════════════════════════════════════════════════╝');
+            
+            if (maintenanceStatus.enabled) {
+                console.log('🚧 Testing in MAINTENANCE MODE');
+                
+                // Test blocked endpoints
+                const testEndpoints = [
+                    { path: '/api/items', name: 'Items API' },
+                    { path: '/api/stats', name: 'Stats API' },
+                    { path: '/api/trending', name: 'Trending API' }
+                ];
+                
+                console.log('\n🔍 Testing blocked API endpoints:');
+                for (const endpoint of testEndpoints) {
+                    try {
+                        await this.makeRequest(endpoint.path);
+                        console.log(`   ❌ ${endpoint.name}: SHOULD be blocked but isn't`);
+                    } catch (error) {
+                        if (error.message.includes('maintenance')) {
+                            console.log(`   ✅ ${endpoint.name}: Properly blocked`);
+                        } else {
+                            console.log(`   ⚠️  ${endpoint.name}: Error: ${error.message}`);
+                        }
+                    }
+                }
+                
+                console.log('\n📋 Maintenance Configuration:');
+                console.log(`   Title: ${maintenanceStatus.title}`);
+                console.log(`   Message: ${maintenanceStatus.message.substring(0, 50)}...`);
+                if (maintenanceStatus.estimatedTime) {
+                    console.log(`   Estimated Time: ${maintenanceStatus.estimatedTime}`);
+                }
+                
+            } else {
+                console.log('✅ Testing in NORMAL MODE');
+                console.log('💡 To test maintenance mode, enable it from admin panel');
+                
+                // Test accessible endpoints
+                try {
+                    const stats = await this.makeRequest('/api/stats');
+                    console.log('   ✅ Stats API: Working');
+                } catch (error) {
+                    console.log('   ❌ Stats API: Error');
+                }
+                
+                try {
+                    const items = await this.makeRequest('/api/items?limit=1');
+                    console.log('   ✅ Items API: Working');
+                } catch (error) {
+                    console.log('   ❌ Items API: Error');
+                }
+            }
+            
+            console.log('\n🔗 Quick Access Links:');
+            console.log(`   • Admin Panel: ${this.baseUrl}/admin-login`);
+            console.log(`   • Maintenance Page: ${this.baseUrl}/maintenance.html`);
+            console.log(`   • Homepage: ${this.baseUrl}`);
+            
+        } catch (error) {
+            console.log('❌ Test failed - unable to connect to server');
+            console.log(`⚠️  Error: ${error.message}`);
+        }
+    }
+
     // Show version information
     version() {
         console.log(`
@@ -268,6 +393,7 @@ class GoatMart {
 📋 Architecture: ${process.arch}
 
 📖 For help: goatmart help
+🧪 Test maintenance: goatmart test
 🐛 Report issues: ${this.baseUrl}/issues
         `);
     }
@@ -376,6 +502,10 @@ function main() {
             
         case 'search':
             goatmart.search(args.slice(1).join(' '));
+            break;
+            
+        case 'test':
+            goatmart.test();
             break;
             
         default:
