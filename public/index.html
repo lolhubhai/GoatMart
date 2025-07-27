@@ -302,12 +302,12 @@
             height: 56px;
             border: 1px solid rgba(0,0,0,0.12);
             border-radius: var(--radius-small);
-            padding: 0 16px 0 56px;
+            padding: 0 48px 0 56px;
             font-size: 16px;
             font-family: 'Roboto', sans-serif;
             background: var(--surface);
             color: var(--on-surface);
-            transition: border-color 0.2s;
+            transition: all 0.2s ease;
         }
 
         .search-input:focus {
@@ -315,6 +315,27 @@
             border-color: var(--primary);
             border-width: 2px;
             padding-left: 55px;
+            padding-right: 47px;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(0,0,0,0.54);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .search-clear-btn:hover {
+            background: rgba(0,0,0,0.04);
+            color: var(--primary);
         }
 
         .search-icon {
@@ -714,7 +735,10 @@
             <div class="search-card">
                 <div class="search-input-container">
                     <i class="material-icons search-icon">search</i>
-                    <input type="text" class="search-input" placeholder="Search for amazing commands..." id="searchInput">
+                    <input type="text" class="search-input" placeholder="Search for amazing commands..." id="searchInput" autocomplete="off">
+                    <button type="button" class="search-clear-btn" id="searchClearBtn" style="display: none;">
+                        <i class="material-icons">clear</i>
+                    </button>
                 </div>
                 
                 <div class="chip-container">
@@ -801,6 +825,40 @@
         document.addEventListener('DOMContentLoaded', function() {
             // App is already initialized via main.js
             console.log('GoatMart app initialized successfully');
+            
+            // Enhanced search functionality
+            const searchInput = document.getElementById('searchInput');
+            const searchClearBtn = document.getElementById('searchClearBtn');
+            
+            if (searchInput && searchClearBtn) {
+                // Show/hide clear button
+                searchInput.addEventListener('input', function() {
+                    if (this.value.length > 0) {
+                        searchClearBtn.style.display = 'block';
+                    } else {
+                        searchClearBtn.style.display = 'none';
+                    }
+                });
+                
+                // Clear search
+                searchClearBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    searchClearBtn.style.display = 'none';
+                    searchInput.focus();
+                    // Trigger search with empty value
+                    if (window.app) {
+                        window.app.loadCommands('', window.app.currentType || 'all');
+                    }
+                });
+                
+                // Enter key search
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+            }
         });
 
         function initMaterialDesign() {

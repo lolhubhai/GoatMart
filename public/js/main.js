@@ -76,10 +76,29 @@ class GoatMartApp {
         // Search functionality
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
-            searchInput.addEventListener('input', this.debounce((e) => {
-                this.currentSearch = e.target.value;
+            // Clear any existing listeners
+            searchInput.removeEventListener('input', this.searchHandler);
+            
+            // Create bound search handler
+            this.searchHandler = this.debounce((e) => {
+                const searchValue = e.target.value.trim();
+                this.currentSearch = searchValue;
+                console.log('Searching for:', searchValue);
                 this.loadCommands(this.currentSearch, this.currentType);
-            }, 300));
+            }, 300);
+            
+            searchInput.addEventListener('input', this.searchHandler);
+            
+            // Add visual feedback
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.style.borderColor = 'var(--primary)';
+                searchInput.parentElement.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.2)';
+            });
+            
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.style.borderColor = '';
+                searchInput.parentElement.style.boxShadow = '';
+            });
         }
 
         // Filter chips
@@ -89,6 +108,7 @@ class GoatMartApp {
                 chips.forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 this.currentType = chip.dataset.type;
+                console.log('Filter changed to:', this.currentType);
                 this.loadCommands(this.currentSearch, this.currentType);
             });
         });
@@ -426,17 +446,23 @@ class GoatMartApp {
 
         try {
             const params = new URLSearchParams();
-            if (search) params.append('search', search);
+            if (search && search.trim()) params.append('search', search.trim());
             if (type !== 'all') params.append('category', type);
             // Remove limit to get all commands
             params.append('limit', '1000'); // Set high limit to get all commands
 
             const response = await fetch(`/api/items?${params}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
 
             if (data.items && data.items.length > 0) {
                 const commandCards = data.items.map(command => this.createCommandCard(command)).join('');
                 container.innerHTML = commandCards;
+                
+                // Re-attach event listeners to new cards
+                this.attachCardEventListeners();
             } else {
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
@@ -453,11 +479,29 @@ class GoatMartApp {
                     <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
                     <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
                     <p>Please try again later</p>
+                    <button class="btn btn-contained" onclick="window.app.loadCommands('${search}', '${type}')" style="margin-top: 16px;">
+                        <i class="material-icons">refresh</i>
+                        Try Again
+                    </button>
                 </div>
             `;
         }
 
         this.isLoading = false;
+    }
+
+    attachCardEventListeners() {
+        // Re-attach hover effects to new cards
+        document.querySelectorAll('.command-card').forEach(card => {
+            card.addEventListener('mouseenter', this.handleCardHover);
+            card.addEventListener('mouseleave', this.handleCardLeave);
+        });
+
+        // Re-attach button ripple effects
+        document.querySelectorAll('.btn').forEach(button => {
+            button.removeEventListener('click', this.createRipple);
+            button.addEventListener('click', this.createRipple);
+        });
     }
 
     
@@ -660,80 +704,3 @@ const app = new GoatMartApp();
 window.app = app;
 window.GoatMartApp = GoatMartApp;
 
-// Add CSS for ripple animation
-if (!document.querySelector('#main-app-styles')) {
-    const style = document.createElement('style');
-    style.id = 'main-app-styles';
-    style.textContent = `
-      @keyframes ripple {
-        to {
-          transform: scale(4);
-          opacity: 0;
-        }
-      }
-
-      .notification {
-        position: fixed;
-        bottom: 80px;
-        left: 16px;
-        right: 16px;
-        background: #3b82f6;
-        color: white;
-        padding: 16px 20px;
-        border-radius: 8px;
-        font-weight: 500;
-        z-index: 1003;
-        transform: translateY(100%);
-        transition: transform 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        max-width: 400px;
-        margin: 0 auto;
-        text-align: center;
-      }
-
-      .notification-success {
-        background: #10b981;
-      }
-
-      .notification-warning {
-        background: #f59e0b;
-      }
-
-      .notification-error {
-        background: #ef4444;
-      }
-
-      .loading {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 64px 16px;
-        color: var(--on-surface);
-        grid-column: 1 / -1;
-      }
-
-      .loading-spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(99, 102, 241, 0.3);
-        border-top: 4px solid var(--primary);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 16px;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
-      .loading-text {
-        font-size: 16px;
-        font-weight: 400;
-        color: var(--on-surface);
-        opacity: 0.8;
-      }
-    `;
-    document.head.appendChild(style);
-}
