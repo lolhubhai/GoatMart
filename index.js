@@ -273,7 +273,7 @@ app.get('/api/items', async (req, res) => {
       .limit(parseInt(limit));
 
     const itemsWithRawLinks = items.map(item => ({
-      ...items.toObject(),
+      ...item.toObject(),
       code: undefined,
       rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`
     }));

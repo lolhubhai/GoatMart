@@ -661,78 +661,79 @@ window.app = app;
 window.GoatMartApp = GoatMartApp;
 
 // Add CSS for ripple animation
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes ripple {
-    to {
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
+if (!document.querySelector('#main-app-styles')) {
+    const style = document.createElement('style');
+    style.id = 'main-app-styles';
+    style.textContent = `
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
 
-  .notification {
-    position: fixed;
-    bottom: 80px;
-    left: 16px;
-    right: 16px;
-    background: #3b82f6;
-    color: white;
-    padding: 16px 20px;
-    border-radius: 8px;
-    font-weight: 500;
-    z-index: 1003;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    max-width: 400px;
-    margin: 0 auto;
-    text-align: center;
-  }
+      .notification {
+        position: fixed;
+        bottom: 80px;
+        left: 16px;
+        right: 16px;
+        background: #3b82f6;
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        z-index: 1003;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        max-width: 400px;
+        margin: 0 auto;
+        text-align: center;
+      }
 
-  .notification-success {
-    background: #10b981;
-  }
+      .notification-success {
+        background: #10b981;
+      }
 
-  .notification-warning {
-    background: #f59e0b;
-  }
+      .notification-warning {
+        background: #f59e0b;
+      }
 
-  .notification-error {
-    background: #ef4444;
-  }
+      .notification-error {
+        background: #ef4444;
+      }
 
-  .loading {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 64px 16px;
-    color: var(--on-surface);
-    grid-column: 1 / -1;
-  }
+      .loading {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 64px 16px;
+        color: var(--on-surface);
+        grid-column: 1 / -1;
+      }
 
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(99, 102, 241, 0.3);
-    border-top: 4px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
-  }
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(99, 102, 241, 0.3);
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
 
-  .loading-text {
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--on-surface);
-    opacity: 0.8;
-  }
-
-  
-`;
-document.head.appendChild(style);
+      .loading-text {
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--on-surface);
+        opacity: 0.8;
+      }
+    `;
+    document.head.appendChild(style);
+}
