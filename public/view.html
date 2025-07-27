@@ -449,18 +449,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="js/android-ui.js"></script>
     <script>
-        // Get item ID from URL parameters
+        // Get parameters from URL
         const urlParams = new URLSearchParams(window.location.search);
         const itemId = urlParams.get('id');
+        const pathSegments = window.location.pathname.split('/');
+        const shortId = pathSegments[2]; // For /view/shortId format
 
         async function loadCommand() {
-            if (!itemId) {
+            let apiUrl;
+            
+            if (shortId && shortId !== 'view.html') {
+                // Loading by shortId from /view/shortId
+                apiUrl = `/api/command/${shortId}`;
+            } else if (itemId) {
+                // Loading by itemID from view.html?id=123
+                apiUrl = `/api/item/${itemId}`;
+            } else {
                 showError('No command ID specified');
                 return;
             }
 
             try {
-                const response = await fetch(`/api/item/${itemId}`);
+                const response = await fetch(apiUrl);
                 if (!response.ok) {
                     throw new Error('Command not found');
                 }
@@ -482,6 +492,14 @@
                 <div class="command-header-card">
                     <h1 class="command-title">${escapeHtml(command.itemName)}</h1>
                     <div class="command-meta">
+                        <div class="meta-item">
+                            <i class="material-icons" style="font-size: 18px;">tag</i>
+                            <span>ID: ${command.itemID}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="material-icons" style="font-size: 18px;">fingerprint</i>
+                            <span>Short ID: ${command.shortId}</span>
+                        </div>
                         <div class="meta-item">
                             <i class="material-icons" style="font-size: 18px;">person</i>
                             <span>by ${escapeHtml(command.authorName)}</span>

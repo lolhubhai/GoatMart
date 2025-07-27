@@ -526,7 +526,7 @@ class GoatMartApp {
                         ${command.tags ? command.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('') : ''}
                     </div>
                     <div class="command-actions">
-                        <a href="view.html?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
+                        <a href="/view/${command.shortId || command.itemID}" class="btn btn-contained" style="flex: 1;">
                             <i class="material-icons" style="font-size: 18px;">visibility</i>
                             View
                         </a>

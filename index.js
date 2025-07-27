@@ -452,6 +452,44 @@ app.get('/api/item/:itemId', async (req, res) => {
 
     res.json({
       itemID: item.itemID,
+      shortId: item.shortId,
+      itemName: item.itemName,
+      description: item.description,
+      type: item.type,
+      authorName: item.authorName,
+      createdAt: item.createdAt,
+      likes: item.likes,
+      views: item.views,
+      rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`,
+      code: item.code
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Add route for viewing by unique shortId
+app.get('/view/:shortId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'view.html'));
+});
+
+// API endpoint for getting command by shortId
+app.get('/api/command/:shortId', async (req, res) => {
+  try {
+    const shortId = req.params.shortId;
+    const item = await Item.findOne({ shortId });
+
+    if (!item) {
+      return res.status(404).json({ error: 'Command not found' });
+    }
+
+    // Increment views
+    item.views += 1;
+    await item.save();
+
+    res.json({
+      itemID: item.itemID,
+      shortId: item.shortId,
       itemName: item.itemName,
       description: item.description,
       type: item.type,
