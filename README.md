@@ -44,6 +44,3 @@ POST /api/items: Upload a new command.
 POST /api/items/:id/like: Like a specific command.
 GET /api/stats: Fetch statistics about the platform usage.
 Refer to the source code for more detailed information about each endpoint and their parameters.
-
-Contributing
-Contributions are welcome! Please fork the repository and submit a pull request for any changes or improvements.
