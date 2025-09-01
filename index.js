@@ -121,7 +121,7 @@ function checkMaintenanceMode(req, res, next) {
   next();
 }
 
-mongoose.connect('mongodb+srv://lajegix672:KaXY8RqzIcJ31Nyo@goatmart.9p854kx.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
+mongoose.connect(GoatMart'mongodb+srv://aryanchauhan786:Aryanchauhan009@cluster0.fadh4dj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
