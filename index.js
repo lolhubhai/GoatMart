@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 5000;
 
 let maintenanceSettings = {
   enabled: false,

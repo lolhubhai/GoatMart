@@ -8,6 +8,14 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  
+  /* Enhanced touch feedback */
+  .btn, .chip, .command-card {
+    -webkit-tap-highlight-color: rgba(99, 102, 241, 0.3);
+    tap-highlight-color: rgba(99, 102, 241, 0.3);
+    touch-action: manipulation;
+    transform: translateZ(0); /* Enable hardware acceleration */
+  }
 
   /* Allow text selection for content */
   .command-description,
@@ -81,6 +89,7 @@
   /* Enhanced Hero Section for Mobile */
   .hero-section {
     padding: 32px 16px 24px;
+    background-attachment: scroll; /* Better performance on mobile */
   }
 
   .hero-title {
@@ -116,9 +125,10 @@
   }
 
   .search-input {
-    height: 48px;
-    font-size: 16px;
+    height: 52px; /* Larger touch target */
+    font-size: 16px; /* Prevent zoom on iOS */
     padding: 0 16px 0 48px;
+    border-radius: 26px; /* More rounded for mobile */
   }
 
   .search-input:focus {

@@ -47,12 +47,35 @@
     --label-medium: 12px;
     --label-small: 11px;
     
+    /* Modern Gradients */
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-warm: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --gradient-cool: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    --gradient-dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    
+    /* Glass Effect */
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    
     /* Motion */
     --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
     --motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --motion-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --motion-easing-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --motion-duration-short: 200ms;
     --motion-duration-medium: 300ms;
     --motion-duration-long: 400ms;
+    --motion-duration-bounce: 600ms;
+    
+    /* Animation Utilities */
+    --transform-hover: translateY(-4px) scale(1.02);
+    --transform-active: translateY(0) scale(0.98);
+    --filter-glow: drop-shadow(0 0 20px rgba(99, 102, 241, 0.4));
+    --backdrop-blur: blur(20px);
 }
 
 /* Dark Mode Variables */
@@ -85,10 +108,27 @@ body {
     font-size: var(--body-large);
     line-height: 1.5;
     color: var(--on-background);
-    background: var(--background);
+    background: var(--gradient-hero);
+    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* Typography */

@@ -24,6 +24,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Material+Icons&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/animations.css">
 
     <style>
         /* Android Material Design Variables */
@@ -62,13 +65,37 @@
 
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             color: var(--on-background);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(1deg); }
+            66% { transform: translateY(5px) rotate(-1deg); }
         }
 
         /* Top App Bar */
@@ -172,14 +199,31 @@
         }
 
         .btn-contained {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
             color: var(--on-primary);
             box-shadow: var(--elevation-1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-contained::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-contained:hover::before {
+            left: 100%;
         }
 
         .btn-contained:hover {
-            box-shadow: var(--elevation-2);
-            transform: translateY(-1px);
+            box-shadow: var(--elevation-2), 0 0 20px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px) scale(1.05);
         }
 
         .btn-outlined {
@@ -209,12 +253,14 @@
 
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9), rgba(240, 147, 251, 0.8));
             color: var(--on-primary);
             padding: 64px 16px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .hero-section::before {
@@ -391,10 +437,11 @@
         }
 
         .chip.active {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
             color: var(--on-primary);
             border-color: var(--primary);
-            box-shadow: var(--elevation-1);
+            box-shadow: var(--elevation-1), 0 0 15px rgba(99, 102, 241, 0.3);
+            transform: scale(1.05);
         }
 
         .chip:hover:not(.active) {
@@ -547,6 +594,8 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid var(--outline-variant);
             position: relative;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .command-card::before {
@@ -562,8 +611,10 @@
         }
 
         .command-card:hover {
-            box-shadow: var(--elevation-3);
-            transform: translateY(-6px);
+            box-shadow: var(--elevation-3), 0 0 30px rgba(99, 102, 241, 0.2);
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(99, 102, 241, 0.3);
+            filter: brightness(1.05);
         }
 
         .command-card:hover::before {

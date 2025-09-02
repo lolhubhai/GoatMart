@@ -1,6 +1,6 @@
 .card {
   background: var(--glass-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
@@ -39,7 +39,7 @@
 
 .command-card {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -150,7 +150,7 @@
   color: white;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   border: none;
   cursor: pointer;
   transition: var(--transition);
@@ -185,7 +185,7 @@
 
 .btn {
   padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   font-weight: 600;
   transition: var(--transition);
   display: inline-flex;
@@ -268,7 +268,7 @@
   width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid rgba(99, 102, 241, 0.1);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   font-size: 1rem;
   transition: var(--transition);
   background: var(--card-bg);
@@ -312,7 +312,7 @@
   text-align: center;
   padding: 1.5rem;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -348,14 +348,14 @@
   margin: 0 auto;
   padding: 2rem;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   box-shadow: var(--shadow-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .code-container {
   background: #1e1e1e;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   overflow: hidden;
   margin-top: 2rem;
   box-shadow: var(--shadow-lg);
@@ -380,7 +380,7 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-size: 0.875rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -501,7 +501,7 @@
   gap: 1rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -568,7 +568,7 @@
 .upload-form {
     background: var(--card-bg);
     padding: 2rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     box-shadow: var(--shadow-lg);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -595,7 +595,7 @@
     width: 100%;
     padding: 0.75rem 1rem;
     border: 2px solid rgba(124, 58, 237, 0.1);
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-color);
     font-family: 'Space Grotesk', sans-serif;
@@ -627,7 +627,7 @@
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -726,7 +726,7 @@
 .gradient-border {
   position: relative;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   padding: 2rem;
 }
 
@@ -757,7 +757,7 @@
   width: 100%;
   padding: 1rem;
   border: 2px solid transparent;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-color);
   transition: all 0.3s ease;
@@ -787,7 +787,7 @@
 .hover-card {
   position: relative;
   overflow: hidden;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   background: var(--card-bg);
   transition: all 0.3s ease;
 }
@@ -823,7 +823,7 @@
   border-collapse: separate;
   border-spacing: 0;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   overflow: hidden;
 }
 
@@ -899,7 +899,7 @@
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-color);
     text-decoration: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     font-weight: 600;
     transition: var(--transition);
     display: flex;
@@ -989,7 +989,7 @@
     gap: 0.25rem;
 }.card {
   background: var(--glass-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
@@ -1028,7 +1028,7 @@
 
 .command-card {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -1139,7 +1139,7 @@
   color: white;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   border: none;
   cursor: pointer;
   transition: var(--transition);
@@ -1174,7 +1174,7 @@
 
 .btn {
   padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   font-weight: 600;
   transition: var(--transition);
   display: inline-flex;
@@ -1257,7 +1257,7 @@
   width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid rgba(99, 102, 241, 0.1);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   font-size: 1rem;
   transition: var(--transition);
   background: var(--card-bg);
@@ -1301,7 +1301,7 @@
   text-align: center;
   padding: 1.5rem;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1337,14 +1337,14 @@
   margin: 0 auto;
   padding: 2rem;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   box-shadow: var(--shadow-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .code-container {
   background: #1e1e1e;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   overflow: hidden;
   margin-top: 2rem;
   box-shadow: var(--shadow-lg);
@@ -1369,7 +1369,7 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-size: 0.875rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1490,7 +1490,7 @@
   gap: 1rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -1557,7 +1557,7 @@
 .upload-form {
     background: var(--card-bg);
     padding: 2rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     box-shadow: var(--shadow-lg);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -1584,7 +1584,7 @@
     width: 100%;
     padding: 0.75rem 1rem;
     border: 2px solid rgba(124, 58, 237, 0.1);
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-color);
     font-family: 'Space Grotesk', sans-serif;
@@ -1616,7 +1616,7 @@
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -1715,7 +1715,7 @@
 .gradient-border {
   position: relative;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   padding: 2rem;
 }
 
@@ -1746,7 +1746,7 @@
   width: 100%;
   padding: 1rem;
   border: 2px solid transparent;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-color);
   transition: all 0.3s ease;
@@ -1776,7 +1776,7 @@
 .hover-card {
   position: relative;
   overflow: hidden;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   background: var(--card-bg);
   transition: all 0.3s ease;
 }
@@ -1812,7 +1812,7 @@
   border-collapse: separate;
   border-spacing: 0;
   background: var(--card-bg);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-large);
   overflow: hidden;
 }
 
@@ -1888,7 +1888,7 @@
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-color);
     text-decoration: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-large);
     font-weight: 600;
     transition: var(--transition);
     display: flex;
