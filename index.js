@@ -98,6 +98,11 @@ function checkMaintenanceMode(req, res, next) {
     '/api/admin'
   ];
 
+  // Always allow admin login endpoint regardless of maintenance mode
+  if (req.path === '/api/admin/login') {
+    return next();
+  }
+
   // Static assets (CSS, JS, images) - always allowed
   const staticPrefixes = [
     '/css/',
@@ -221,7 +226,41 @@ const Item = mongoose.model('Item', itemSchema);
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Apply maintenance mode check to all routes
+// Admin login endpoint - MUST be before maintenance check middleware
+app.post('/api/admin/login', (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+    
+    if (username === adminCredentials.username && password === adminCredentials.password) {
+      // Generate session token
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+      
+      adminSessions.set(token, {
+        user: { username: adminCredentials.username },
+        expires: expires
+      });
+      
+      res.json({
+        success: true,
+        token: token,
+        user: { username: adminCredentials.username },
+        message: 'Login successful'
+      });
+    } else {
+      res.status(401).json({ error: 'Invalid username or password' });
+    }
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Apply maintenance mode check to all routes EXCEPT admin login
 app.use(checkMaintenanceMode);
 
 // Request tracking middleware
@@ -236,31 +275,6 @@ app.use(async (req, res, next) => {
     next();
   } catch (error) {
     next();
-  }
-});
-
-// Admin login endpoint
-app.post('/api/admin/login', (req, res) => {
-  const { username, password } = req.body;
-  
-  if (username === adminCredentials.username && password === adminCredentials.password) {
-    // Generate session token
-    const token = crypto.randomBytes(32).toString('hex');
-    const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
-    
-    adminSessions.set(token, {
-      user: { username: adminCredentials.username },
-      expires: expires
-    });
-    
-    res.json({
-      success: true,
-      token: token,
-      user: { username: adminCredentials.username },
-      message: 'Login successful'
-    });
-  } else {
-    res.status(401).json({ error: 'Invalid username or password' });
   }
 });
 
