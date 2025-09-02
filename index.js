@@ -17,7 +17,7 @@ let maintenanceSettings = {
 
 // Admin credentials
 const adminCredentials = {
-  username: "aryan788",
+  username: "aryan786",
   password: "Aryan@009"
 };
 
@@ -31,11 +31,13 @@ function generateId() {
 // Generate sequential numeric ID
 async function generateSequentialId() {
   try {
-    const count = await Item.countDocuments();
-    return count + 1;
+    // Find the highest existing sequentialId and add 1
+    const lastItem = await Item.findOne().sort({ sequentialId: -1 });
+    return lastItem ? lastItem.sequentialId + 1 : 1;
   } catch (error) {
     console.error('Error generating sequential ID:', error);
-    return Date.now(); // Fallback to timestamp
+    // Fallback to timestamp if there's an issue finding the last item or counting
+    return Date.now(); 
   }
 }
 
@@ -55,17 +57,17 @@ function verifyAdminToken(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '') || 
                 req.query.token || 
                 req.body.token;
-  
+
   if (!token || !adminSessions.has(token)) {
     return res.status(401).json({ error: 'Unauthorized access' });
   }
-  
+
   const session = adminSessions.get(token);
   if (session.expires < Date.now()) {
     adminSessions.delete(token);
     return res.status(401).json({ error: 'Session expired' });
   }
-  
+
   req.admin = session.user;
   next();
 }
@@ -76,7 +78,7 @@ function checkMaintenanceMode(req, res, next) {
   const token = (req.headers && req.headers.authorization ? req.headers.authorization.replace('Bearer ', '') : '') || 
                 (req.query && req.query.token ? req.query.token : '') || 
                 (req.body && req.body.token ? req.body.token : '');
-  
+
   const isAdmin = token && adminSessions.has(token) && adminSessions.get(token).expires > Date.now();
 
   // Always allow these paths regardless of maintenance mode
@@ -144,16 +146,16 @@ function checkMaintenanceMode(req, res, next) {
       '/paste.html',
       '/delete.html'
     ];
-    
+
     if (blockedPages.includes(req.path)) {
       return res.redirect('/maintenance.html');
     }
-    
+
     // Block other HTML files except maintenance.html
     if (req.path.endsWith('.html') && req.path !== '/maintenance.html') {
       return res.redirect('/maintenance.html');
     }
-    
+
     // For API endpoints, return JSON response
     if (req.path.startsWith('/api/')) {
       return res.status(503).json({
@@ -164,11 +166,11 @@ function checkMaintenanceMode(req, res, next) {
         title: maintenanceSettings.title
       });
     }
-    
+
     // For all other requests during maintenance, redirect to maintenance page
     return res.redirect('/maintenance.html');
   }
-  
+
   next();
 }
 
@@ -195,7 +197,7 @@ const statsSchema = new mongoose.Schema({
 const Stats = mongoose.model('Stats', statsSchema);
 
 const itemSchema = new mongoose.Schema({
-  itemID: Number,
+  itemID: { type: Number, unique: true }, // Changed to unique
   shortId: { type: String, unique: true, default: generateId },
   sequentialId: { type: Number, unique: true }, // New sequential ID field
   itemName: { type: String, required: true },
@@ -230,21 +232,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/api/admin/login', (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
-    
+
     if (username === adminCredentials.username && password === adminCredentials.password) {
       // Generate session token
       const token = crypto.randomBytes(32).toString('hex');
       const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
-      
+
       adminSessions.set(token, {
         user: { username: adminCredentials.username },
         expires: expires
       });
-      
+
       res.json({
         success: true,
         token: token,
@@ -283,11 +285,11 @@ app.post('/api/admin/logout', verifyAdminToken, (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '') || 
                 req.query.token || 
                 req.body.token;
-  
+
   if (token) {
     adminSessions.delete(token);
   }
-  
+
   res.json({ success: true, message: 'Logged out successfully' });
 });
 
@@ -324,7 +326,7 @@ app.delete('/api/admin/commands/:id', verifyAdminToken, async (req, res) => {
 app.post('/api/admin/restart', verifyAdminToken, (req, res) => {
   console.log(`Project restart initiated by admin: ${req.admin.username}`);
   res.json({ success: true, message: 'Restart initiated' });
-  
+
   setTimeout(() => {
     process.exit(0); // This will restart the process in Replit
   }, 1000);
@@ -335,16 +337,16 @@ app.delete('/api/admin/clear-database', verifyAdminToken, async (req, res) => {
   try {
     const itemsCount = await Item.countDocuments();
     const statsCount = await Stats.countDocuments();
-    
+
     await Item.deleteMany({});
     await Stats.deleteMany({});
-    
+
     // Create fresh stats
     const newStats = new Stats();
     await newStats.save();
-    
+
     console.log(`Database cleared by admin ${req.admin.username}: ${itemsCount} items, ${statsCount} stats deleted`);
-    
+
     res.json({ 
       success: true, 
       message: 'Database cleared successfully',
@@ -364,18 +366,18 @@ app.get('/api/admin/export', verifyAdminToken, async (req, res) => {
   try {
     const items = await Item.find({});
     const stats = await Stats.findOne({});
-    
+
     const exportData = {
       timestamp: new Date().toISOString(),
       items: items,
       stats: stats,
       totalItems: items.length
     };
-    
+
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename=goatmart-export-${new Date().toISOString().split('T')[0]}.json`);
     res.json(exportData);
-    
+
     console.log(`Data exported by admin: ${req.admin.username}`);
   } catch (error) {
     console.error('Error exporting data:', error);
@@ -388,31 +390,31 @@ app.get('/api/analytics', async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const todayItems = await Item.find({ createdAt: { $gte: today } });
     const todayViews = todayItems.reduce((sum, item) => sum + item.views, 0);
     const todayLikes = todayItems.reduce((sum, item) => sum + item.likes, 0);
     const todayUploads = todayItems.length;
-    
+
     const activeUsers = await Item.distinct('authorName', {
       createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
     });
-    
+
     const hourlyData = [];
     for (let i = 0; i < 24; i++) {
       const hourStart = new Date(today);
       hourStart.setHours(i);
       const hourEnd = new Date(today);
       hourEnd.setHours(i + 1);
-      
+
       const hourViews = await Item.aggregate([
         { $match: { createdAt: { $gte: hourStart, $lt: hourEnd } } },
         { $group: { _id: null, total: { $sum: '$views' } } }
       ]);
-      
+
       hourlyData.push(hourViews[0]?.total || 0);
     }
-    
+
     res.json({
       todayViews,
       todayLikes,
@@ -437,7 +439,7 @@ app.get('/api/trending-keywords', async (req, res) => {
       { $limit: 10 },
       { $project: { _id: 0, keyword: '$_id', count: 1 } }
     ]);
-    
+
     const trendingKeywords = keywords.map(k => k.keyword);
     res.json(trendingKeywords);
   } catch (error) {
@@ -450,7 +452,7 @@ app.get('/api/search/semantic', async (req, res) => {
   try {
     const { q, keywords } = req.query;
     const keywordArray = keywords ? keywords.split(',') : [];
-    
+
     let query = {};
     if (q) {
       query.$or = [
@@ -459,14 +461,14 @@ app.get('/api/search/semantic', async (req, res) => {
         { tags: { $in: keywordArray } }
       ];
     }
-    
+
     const items = await Item.find(query)
       .sort({ views: -1, likes: -1 })
       .limit(20);
-    
+
     // Generate AI-powered suggestions
     const suggestions = await generateSearchSuggestions(q, keywordArray);
-    
+
     res.json({
       items: items.map(item => ({
         ...item.toObject(),
@@ -486,10 +488,10 @@ app.get('/api/search/semantic', async (req, res) => {
 app.post('/api/validate-code', async (req, res) => {
   try {
     const { code, language } = req.body;
-    
+
     // Basic validation based on language
     const validation = validateCodeSyntax(code, language);
-    
+
     res.json({
       isValid: validation.isValid,
       errors: validation.errors,
@@ -507,10 +509,10 @@ app.get('/api/user/:username', async (req, res) => {
     const username = req.params.username;
     const userItems = await Item.find({ authorName: username })
       .sort({ createdAt: -1 });
-    
+
     const totalLikes = userItems.reduce((sum, item) => sum + item.likes, 0);
     const totalViews = userItems.reduce((sum, item) => sum + item.views, 0);
-    
+
     const profile = {
       username,
       totalCommands: userItems.length,
@@ -523,7 +525,7 @@ app.get('/api/user/:username', async (req, res) => {
       })),
       achievements: generateUserAchievements(userItems, totalLikes, totalViews)
     };
-    
+
     res.json(profile);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching user profile' });
@@ -548,7 +550,7 @@ function validateCodeSyntax(code, language) {
     warnings: [],
     suggestions: []
   };
-  
+
   if (language === 'javascript') {
     // Basic JavaScript validation
     if (!code.includes('module.exports') && !code.includes('export')) {
@@ -558,23 +560,23 @@ function validateCodeSyntax(code, language) {
       result.suggestions.push('Replace console.log with proper logging for production');
     }
   }
-  
+
   if (code.length < 50) {
     result.warnings.push('Code seems quite short. Consider adding more functionality.');
   }
-  
+
   return result;
 }
 
 function generateUserAchievements(items, likes, views) {
   const achievements = [];
-  
+
   if (items.length >= 1) achievements.push({ name: 'First Upload', icon: '🚀', unlocked: true });
   if (items.length >= 5) achievements.push({ name: 'Active Creator', icon: '⭐', unlocked: true });
   if (items.length >= 10) achievements.push({ name: 'Command Master', icon: '👑', unlocked: true });
   if (likes >= 100) achievements.push({ name: 'Popular Creator', icon: '❤️', unlocked: true });
   if (views >= 1000) achievements.push({ name: 'Viral Creator', icon: '🔥', unlocked: true });
-  
+
   return achievements;
 }
 
@@ -620,7 +622,7 @@ app.get('/api/admin/logs', verifyAdminToken, (req, res) => {
 </body>
 </html>
   `;
-  
+
   res.setHeader('Content-Type', 'text/html');
   res.send(logs);
 });
@@ -632,16 +634,16 @@ app.get('/api/maintenance', (req, res) => {
 
 app.post('/api/maintenance', verifyAdminToken, (req, res) => {
   const { enabled, title, message, estimatedTime } = req.body;
-  
+
   // Basic validation
   if (typeof enabled !== 'boolean') {
     return res.status(400).json({ error: 'Invalid enabled value' });
   }
-  
+
   if (title && typeof title !== 'string') {
     return res.status(400).json({ error: 'Invalid title' });
   }
-  
+
   if (message && typeof message !== 'string') {
     return res.status(400).json({ error: 'Invalid message' });
   }
@@ -655,7 +657,7 @@ app.post('/api/maintenance', verifyAdminToken, (req, res) => {
   };
 
   console.log(`Maintenance mode ${enabled ? 'enabled' : 'disabled'} by admin: ${req.admin.username}`);
-  
+
   res.json({ 
     success: true, 
     message: 'Maintenance settings updated',
@@ -925,13 +927,15 @@ app.post('/v1/paste', async (req, res) => {
       tags = [],
       difficulty = 'Intermediate'
     } = req.body;
-    
+
     if (!code) return res.status(400).json({ error: 'Code is required' });
     if (!description || description.trim() === '') {
       return res.status(400).json({ error: 'Description is required' });
     }
 
-    const itemID = await Item.countDocuments() + 1;
+    // Generate unique itemID by finding the highest existing ID
+    const lastItem = await Item.findOne().sort({ itemID: -1 });
+    const itemID = lastItem ? lastItem.itemID + 1 : 1;
     const shortId = generateId();
     const sequentialId = await generateSequentialId();
 
@@ -948,8 +952,29 @@ app.post('/v1/paste', async (req, res) => {
       difficulty
     });
 
-    await newItem.save();
-    
+    // Save with retry logic for duplicate key errors
+    let saveAttempts = 0;
+    const maxAttempts = 3;
+
+    while (saveAttempts < maxAttempts) {
+      try {
+        await newItem.save();
+        break; // Success, exit loop
+      } catch (error) {
+        if (error.code === 11000 && saveAttempts < maxAttempts - 1) {
+          // Duplicate key error, regenerate IDs and try again
+          saveAttempts++;
+          const lastItem = await Item.findOne().sort({ itemID: -1 });
+          newItem.itemID = lastItem ? lastItem.itemID + 1 : 1;
+          newItem.sequentialId = await generateSequentialId();
+          newItem.shortId = generateId();
+          console.log(`Retrying save with new IDs (attempt ${saveAttempts})`);
+        } else {
+          throw error; // Re-throw if not a duplicate key error or max attempts reached
+        }
+      }
+    }
+
     // Update stats
     try {
       let stats = await Stats.findOne();
@@ -987,7 +1012,7 @@ app.post('/api/items', async (req, res) => {
       tags = [],
       difficulty = 'Intermediate'
     } = req.body;
-    
+
     // Validate required fields
     if (!itemName || !itemName.trim()) {
       return res.status(400).json({ error: 'Command name is required' });
@@ -1002,7 +1027,9 @@ app.post('/api/items', async (req, res) => {
       return res.status(400).json({ error: 'Type is required' });
     }
 
-    const itemID = await Item.countDocuments() + 1;
+    // Generate unique itemID by finding the highest existing ID
+    const lastItem = await Item.findOne().sort({ itemID: -1 });
+    const itemID = lastItem ? lastItem.itemID + 1 : 1;
     const shortId = generateId();
     const sequentialId = await generateSequentialId();
 
@@ -1019,8 +1046,29 @@ app.post('/api/items', async (req, res) => {
       difficulty
     });
 
-    await newItem.save();
-    
+    // Save with retry logic for duplicate key errors
+    let saveAttempts = 0;
+    const maxAttempts = 3;
+
+    while (saveAttempts < maxAttempts) {
+      try {
+        await newItem.save();
+        break; // Success, exit loop
+      } catch (error) {
+        if (error.code === 11000 && saveAttempts < maxAttempts - 1) {
+          // Duplicate key error, regenerate IDs and try again
+          saveAttempts++;
+          const lastItem = await Item.findOne().sort({ itemID: -1 });
+          newItem.itemID = lastItem ? lastItem.itemID + 1 : 1;
+          newItem.sequentialId = await generateSequentialId();
+          newItem.shortId = generateId();
+          console.log(`Retrying save with new IDs (attempt ${saveAttempts})`);
+        } else {
+          throw error; // Re-throw if not a duplicate key error or max attempts reached
+        }
+      }
+    }
+
     // Update stats
     try {
       let stats = await Stats.findOne();
@@ -1082,27 +1130,27 @@ app.get('/api/item/:itemId', async (req, res) => {
 app.get('/view/seq/:sequentialId', async (req, res) => {
   try {
     const sequentialId = parseInt(req.params.sequentialId);
-    
+
     if (isNaN(sequentialId) || sequentialId < 1) {
       return res.sendFile(path.join(__dirname, 'public', 'view.html'));
     }
 
     const item = await Item.findOne({ sequentialId });
-    
+
     if (!item) {
       return res.sendFile(path.join(__dirname, 'public', 'view.html'));
     }
-    
+
     // Read the view.html file
     const fs = require('fs');
     let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
-    
+
     // Replace meta tags with dynamic content
     const title = `${item.itemName} - GoatMart`;
     const description = item.description || 'Amazing bot command shared on GoatMart';
     const url = `${req.protocol}://${req.get('host')}/view/seq/${sequentialId}`;
     const imageUrl = `${req.protocol}://${req.get('host')}/assets/logo.png`;
-    
+
     html = html.replace('<meta property="og:title" content="GoatMart - Bot Commands">', 
                        `<meta property="og:title" content="${escapeHtml(title)}">`);
     html = html.replace('<meta property="og:description" content="Discover and share amazing bot commands">', 
@@ -1111,17 +1159,17 @@ app.get('/view/seq/:sequentialId', async (req, res) => {
                        `<meta property="og:url" content="${url}">`);
     html = html.replace('<meta property="og:image" content="/assets/logo.png">', 
                        `<meta property="og:image" content="${imageUrl}">`);
-    
+
     html = html.replace('<meta name="twitter:title" content="GoatMart - Bot Commands">', 
                        `<meta name="twitter:title" content="${escapeHtml(title)}">`);
     html = html.replace('<meta name="twitter:description" content="Discover and share amazing bot commands">', 
                        `<meta name="twitter:description" content="${escapeHtml(description)}">`);
     html = html.replace('<meta name="twitter:image" content="/assets/logo.png">', 
                        `<meta name="twitter:image" content="${imageUrl}">`);
-    
+
     html = html.replace('<title>View Command - GoatMart</title>', 
                        `<title>${escapeHtml(title)}</title>`);
-    
+
     res.send(html);
   } catch (error) {
     console.error('Error serving view page:', error);
@@ -1134,21 +1182,21 @@ app.get('/view/:shortId', async (req, res) => {
   try {
     const shortId = req.params.shortId;
     const item = await Item.findOne({ shortId });
-    
+
     if (!item) {
       return res.sendFile(path.join(__dirname, 'public', 'view.html'));
     }
-    
+
     // Read the view.html file
     const fs = require('fs');
     let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
-    
+
     // Replace meta tags with dynamic content
     const title = `${item.itemName} - GoatMart`;
     const description = item.description || 'Amazing bot command shared on GoatMart';
     const url = `${req.protocol}://${req.get('host')}/view/${shortId}`;
     const imageUrl = `${req.protocol}://${req.get('host')}/assets/logo.png`;
-    
+
     html = html.replace('<meta property="og:title" content="GoatMart - Bot Commands">', 
                        `<meta property="og:title" content="${escapeHtml(title)}">`);
     html = html.replace('<meta property="og:description" content="Discover and share amazing bot commands">', 
@@ -1157,17 +1205,17 @@ app.get('/view/:shortId', async (req, res) => {
                        `<meta property="og:url" content="${url}">`);
     html = html.replace('<meta property="og:image" content="/assets/logo.png">', 
                        `<meta property="og:image" content="${imageUrl}">`);
-    
+
     html = html.replace('<meta name="twitter:title" content="GoatMart - Bot Commands">', 
                        `<meta name="twitter:title" content="${escapeHtml(title)}">`);
     html = html.replace('<meta name="twitter:description" content="Discover and share amazing bot commands">', 
                        `<meta name="twitter:description" content="${escapeHtml(description)}">`);
     html = html.replace('<meta name="twitter:image" content="/assets/logo.png">', 
                        `<meta name="twitter:image" content="${imageUrl}">`);
-    
+
     html = html.replace('<title>View Command - GoatMart</title>', 
                        `<title>${escapeHtml(title)}</title>`);
-    
+
     res.send(html);
   } catch (error) {
     console.error('Error serving view page:', error);
@@ -1212,7 +1260,7 @@ app.get('/api/command/:shortId', async (req, res) => {
 app.get('/api/command/seq/:sequentialId', async (req, res) => {
   try {
     const sequentialId = parseInt(req.params.sequentialId);
-    
+
     if (isNaN(sequentialId) || sequentialId < 1) {
       return res.status(400).json({ error: 'Invalid sequential ID' });
     }
@@ -1260,7 +1308,7 @@ app.get('/raw/:shortId', async (req, res) => {
 app.get('/raw/seq/:sequentialId', async (req, res) => {
   try {
     const sequentialId = parseInt(req.params.sequentialId);
-    
+
     if (isNaN(sequentialId) || sequentialId < 1) {
       return res.status(404).send('Not found');
     }
