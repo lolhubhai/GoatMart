@@ -304,6 +304,103 @@
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
+        /* Enhanced Features Styling */
+        .suggestion-tag {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .suggestion-tag:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .difficulty-beginner {
+            background: rgba(16, 185, 129, 0.1) !important;
+            color: var(--secondary) !important;
+        }
+
+        .difficulty-intermediate {
+            background: rgba(245, 158, 11, 0.1) !important;
+            color: #d97706 !important;
+        }
+
+        .difficulty-advanced {
+            background: rgba(239, 68, 68, 0.1) !important;
+            color: var(--error) !important;
+        }
+
+        .editor-container {
+            position: relative;
+            border-radius: var(--radius-small);
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--surface-variant);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-small) var(--radius-small) 0 0;
+        }
+
+        .editor-toolbar select {
+            padding: 6px 12px;
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-small);
+            background: var(--surface);
+            color: var(--on-surface);
+            font-size: 14px;
+        }
+
+        .command-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            width: 100%;
+        }
+
+        .star-rating {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        /* Enhanced animations */
+        .command-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .command-card:hover {
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        /* Progress indicator for form completion */
+        .form-progress {
+            width: 100%;
+            height: 4px;
+            background: var(--outline-variant);
+            border-radius: 2px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .form-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .upload-card {
@@ -313,6 +410,25 @@
 
             .main-content {
                 padding: 16px 8px;
+            }
+
+            .editor-toolbar {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .editor-toolbar select,
+            .editor-toolbar .btn {
+                width: 100%;
+            }
+
+            .command-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .command-stats {
+                justify-content: center;
             }
         }
     </style>
@@ -380,7 +496,7 @@
                                   placeholder="Describe what your command does"></textarea>
                     </div>
 
-                    <!-- Updated form-group for code editor -->
+                    <!-- Advanced code editor with live preview -->
                     <div class="form-group">
                         <label class="form-label" for="code">
                             <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">code</i>
@@ -388,10 +504,11 @@
                         </label>
                         <div class="editor-toolbar">
                             <select id="editorTheme" onchange="changeEditorTheme()">
-                                <option value="default">Default</option>
-                                <option value="dark">Dark</option>
+                                <option value="default">Default Light</option>
+                                <option value="material-darker">Material Dark</option>
                                 <option value="monokai">Monokai</option>
                                 <option value="github">GitHub</option>
+                                <option value="xq-dark">XQ Dark</option>
                             </select>
                             <select id="editorLanguage" onchange="changeEditorLanguage()">
                                 <option value="javascript">JavaScript</option>
@@ -399,6 +516,10 @@
                                 <option value="json">JSON</option>
                                 <option value="markdown">Markdown</option>
                             </select>
+                            <button type="button" onclick="insertTemplate()" class="btn btn-text">
+                                <i class="material-icons">integration_instructions</i>
+                                Template
+                            </button>
                             <button type="button" onclick="formatCode()" class="btn btn-text">
                                 <i class="material-icons">code</i>
                                 Format
@@ -407,9 +528,66 @@
                                 <i class="material-icons">check_circle</i>
                                 Validate
                             </button>
+                            <button type="button" onclick="togglePreview()" class="btn btn-text">
+                                <i class="material-icons">preview</i>
+                                Preview
+                            </button>
+                            <button type="button" onclick="toggleFullscreen()" class="btn btn-text">
+                                <i class="material-icons">fullscreen</i>
+                                Fullscreen
+                            </button>
                         </div>
-                        <div id="codeEditor" class="code-editor"></div>
+                        <div class="editor-container" style="position: relative;">
+                            <div id="codeEditor" class="code-editor"></div>
+                            <div id="editorStats" style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: none;">
+                                Lines: <span id="lineCount">0</span> | Chars: <span id="charCount">0</span>
+                            </div>
+                        </div>
                         <textarea id="code" name="code" style="display: none;" required></textarea>
+                    </div>
+
+                    <!-- Live Preview Panel -->
+                    <div class="form-group" id="previewPanel" style="display: none;">
+                        <label class="form-label">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">preview</i>
+                            Live Preview
+                        </label>
+                        <div id="commandPreview" style="background: var(--surface-variant); border: 1px solid var(--outline); border-radius: var(--radius-small); padding: 16px; min-height: 100px;">
+                            <div class="preview-placeholder" style="text-align: center; color: var(--on-surface); opacity: 0.6;">
+                                <i class="material-icons" style="font-size: 48px; margin-bottom: 8px;">preview</i>
+                                <p>Fill in the form to see a preview of your command</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags and Categories -->
+                    <div class="form-group">
+                        <label class="form-label" for="tags">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">sell</i>
+                            Tags (comma-separated)
+                        </label>
+                        <input type="text" id="tags" name="tags" class="form-input"
+                               placeholder="e.g., utility, moderation, fun, music">
+                        <div class="tag-suggestions" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+                            <span class="suggestion-tag" onclick="addTag('utility')">utility</span>
+                            <span class="suggestion-tag" onclick="addTag('moderation')">moderation</span>
+                            <span class="suggestion-tag" onclick="addTag('fun')">fun</span>
+                            <span class="suggestion-tag" onclick="addTag('music')">music</span>
+                            <span class="suggestion-tag" onclick="addTag('admin')">admin</span>
+                            <span class="suggestion-tag" onclick="addTag('game')">game</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="difficulty">
+                            <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">bar_chart</i>
+                            Difficulty Level
+                        </label>
+                        <select id="difficulty" name="difficulty" class="form-select">
+                            <option value="Beginner">Beginner - Easy to understand and use</option>
+                            <option value="Intermediate" selected>Intermediate - Some experience required</option>
+                            <option value="Advanced">Advanced - Expert knowledge needed</option>
+                        </select>
                     </div>
 
                     <button type="submit" class="btn btn-contained">
@@ -469,42 +647,303 @@
         }
 
         function validateCode() {
-            // Basic validation example: check for syntax errors in JavaScript
-            // For more robust validation, you'd need a proper linter or parser
             const currentMode = codeEditor.getOption("mode");
             const code = codeEditor.getValue();
             let isValid = true;
             let errorMessage = '';
+            let suggestions = [];
 
             if (currentMode === "javascript") {
                 try {
-                    // Use a simple eval for basic syntax check, be cautious with eval in production
-                    // A better approach would be using a library like esprima or acorn
                     new Function(code);
+                    // Check for common patterns
+                    if (code.includes('console.log')) {
+                        suggestions.push('Consider using proper logging in production');
+                    }
+                    if (code.includes('eval(')) {
+                        suggestions.push('Avoid using eval() for security reasons');
+                    }
                 } catch (e) {
                     isValid = false;
                     errorMessage = e.message;
                 }
             } else if (currentMode === "python") {
-                // Python validation is more complex, this is a placeholder
-                // You would typically use a Python linter or AST parser
                 if (code.trim() === "") {
                     isValid = false;
                     errorMessage = "Python code cannot be empty.";
+                } else {
+                    // Basic Python checks
+                    const lines = code.split('\n');
+                    let indentationError = false;
+                    lines.forEach((line, index) => {
+                        if (line.trim() && line.startsWith(' ') && !line.startsWith('    ')) {
+                            indentationError = true;
+                        }
+                    });
+                    if (indentationError) {
+                        suggestions.push('Use 4 spaces for indentation in Python');
+                    }
                 }
             }
-            // Add more validation for other languages as needed
 
             const messageDiv = document.getElementById('message');
             messageDiv.style.display = 'block';
             if (isValid) {
                 messageDiv.className = 'message success';
-                messageDiv.innerHTML = '<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</i> Code is valid.';
+                let content = '<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</i> Code is valid!';
+                if (suggestions.length > 0) {
+                    content += '<ul style="margin: 8px 0 0 24px;">' + suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>';
+                }
+                messageDiv.innerHTML = content;
             } else {
                 messageDiv.className = 'message error';
                 messageDiv.innerHTML = `<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">error</i> Code validation failed: ${errorMessage}`;
             }
         }
+
+        function insertTemplate() {
+            const type = document.getElementById('type').value;
+            const language = document.getElementById('editorLanguage').value;
+            
+            let template = '';
+            
+            if (language === 'javascript') {
+                if (type === 'GoatBot') {
+                    template = `module.exports = {
+    config: {
+        name: "commandname",
+        aliases: [],
+        version: "1.0.0",
+        author: "Your Name",
+        countDown: 5,
+        role: 0,
+        shortDescription: "Short description",
+        longDescription: "Detailed description of the command",
+        category: "utility",
+        guide: {
+            en: "{prefix}commandname [args]"
+        }
+    },
+    
+    onStart: async function ({ message, args, api, event }) {
+        // Your command logic here
+        return message.reply("Hello from GoatBot!");
+    }
+};`;
+                } else if (type === 'MiraiBot') {
+                    template = `module.exports.config = {
+    name: "commandname",
+    version: "1.0.0",
+    hasPermssion: 0,
+    credits: "Your Name",
+    description: "Command description",
+    commandCategory: "Utility",
+    usages: "[args]",
+    cooldowns: 5
+};
+
+module.exports.run = async function({ api, event, args }) {
+    // Your command logic here
+    return api.sendMessage("Hello from MiraiBot!", event.threadID);
+};`;
+                }
+            } else if (language === 'python') {
+                template = `#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Command Name: Your Command
+Author: Your Name
+Description: Command description
+Version: 1.0.0
+"""
+
+import asyncio
+from typing import Dict, Any
+
+class BotCommand:
+    def __init__(self):
+        self.name = "commandname"
+        self.description = "Your command description"
+        self.usage = "commandname [args]"
+        
+    async def execute(self, message: str, args: list) -> str:
+        """
+        Execute the command
+        
+        Args:
+            message (str): The input message
+            args (list): Command arguments
+            
+        Returns:
+            str: Command response
+        """
+        return "Hello from Python bot command!"
+
+# Example usage
+if __name__ == "__main__":
+    command = BotCommand()
+    result = asyncio.run(command.execute("test", []))
+    print(result)`;
+            }
+            
+            if (template) {
+                codeEditor.setValue(template);
+                showSnackbar('Template inserted! 📝');
+            }
+        }
+
+        function togglePreview() {
+            const previewPanel = document.getElementById('previewPanel');
+            const isVisible = previewPanel.style.display !== 'none';
+            
+            if (isVisible) {
+                previewPanel.style.display = 'none';
+            } else {
+                previewPanel.style.display = 'block';
+                updatePreview();
+            }
+        }
+
+        function toggleFullscreen() {
+            const editorContainer = document.querySelector('.editor-container');
+            const isFullscreen = editorContainer.classList.contains('fullscreen');
+            
+            if (isFullscreen) {
+                editorContainer.classList.remove('fullscreen');
+                document.body.style.overflow = '';
+                codeEditor.setSize(null, '300px');
+            } else {
+                editorContainer.classList.add('fullscreen');
+                document.body.style.overflow = 'hidden';
+                codeEditor.setSize(null, 'calc(100vh - 120px)');
+            }
+            
+            // Add fullscreen styles
+            if (!document.getElementById('fullscreen-styles')) {
+                const style = document.createElement('style');
+                style.id = 'fullscreen-styles';
+                style.textContent = `
+                    .editor-container.fullscreen {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        z-index: 9999;
+                        background: white;
+                        padding: 20px;
+                    }
+                    .editor-container.fullscreen .code-editor {
+                        height: calc(100vh - 120px) !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function updatePreview() {
+            const name = document.getElementById('itemName').value || 'Command Name';
+            const author = document.getElementById('authorName').value || 'Anonymous';
+            const description = document.getElementById('description').value || 'No description provided';
+            const type = document.getElementById('type').value || 'GoatBot';
+            const difficulty = document.getElementById('difficulty').value || 'Intermediate';
+            const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t);
+            
+            const preview = document.getElementById('commandPreview');
+            preview.innerHTML = `
+                <div style="border: 1px solid var(--outline); border-radius: var(--radius-small); padding: 16px; background: var(--surface);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <h3 style="margin: 0; font-size: 18px; color: var(--on-surface);">${name}</h3>
+                        <span style="background: var(--primary); color: var(--on-primary); padding: 4px 8px; border-radius: 12px; font-size: 12px;">${type}</span>
+                    </div>
+                    <div style="margin-bottom: 8px; color: var(--on-surface); opacity: 0.7; font-size: 14px;">
+                        <i class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">person</i>
+                        ${author}
+                    </div>
+                    <p style="margin: 12px 0; color: var(--on-surface); line-height: 1.5;">${description}</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <span style="background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 4px 8px; border-radius: 12px; font-size: 12px;">${difficulty}</span>
+                        ${tags.map(tag => `<span style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 4px 8px; border-radius: 12px; font-size: 12px;">${tag}</span>`).join('')}
+                    </div>
+                    <div style="display: flex; gap: 16px; font-size: 12px; color: var(--on-surface); opacity: 0.6;">
+                        <span><i class="material-icons" style="font-size: 12px; vertical-align: middle; margin-right: 2px;">visibility</i> 0 views</span>
+                        <span><i class="material-icons" style="font-size: 12px; vertical-align: middle; margin-right: 2px;">favorite</i> 0 likes</span>
+                        <span><i class="material-icons" style="font-size: 12px; vertical-align: middle; margin-right: 2px;">download</i> 0 downloads</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addTag(tag) {
+            const tagsInput = document.getElementById('tags');
+            const currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t);
+            
+            if (!currentTags.includes(tag)) {
+                currentTags.push(tag);
+                tagsInput.value = currentTags.join(', ');
+                updatePreview();
+            }
+        }
+
+        function updateEditorStats() {
+            const code = codeEditor.getValue();
+            const lines = code.split('\n').length;
+            const chars = code.length;
+            
+            document.getElementById('lineCount').textContent = lines;
+            document.getElementById('charCount').textContent = chars;
+            document.getElementById('editorStats').style.display = 'block';
+        }
+
+        function showSnackbar(message) {
+            // Create snackbar
+            const snackbar = document.createElement('div');
+            snackbar.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #323232;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                font-weight: 500;
+                z-index: 10000;
+                animation: snackbarSlideIn 0.3s ease;
+            `;
+            snackbar.textContent = message;
+            
+            // Add animation
+            if (!document.getElementById('snackbar-animation')) {
+                const style = document.createElement('style');
+                style.id = 'snackbar-animation';
+                style.textContent = `
+                    @keyframes snackbarSlideIn {
+                        from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+                        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(snackbar);
+            
+            setTimeout(() => {
+                snackbar.remove();
+            }, 3000);
+        }
+
+        // Auto-update preview and stats
+        ['itemName', 'authorName', 'description', 'type', 'difficulty', 'tags'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', updatePreview);
+            }
+        });
+
+        // Update editor stats on change
+        codeEditor.on('change', updateEditorStats);
 
 
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {

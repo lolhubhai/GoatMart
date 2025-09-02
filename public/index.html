@@ -885,6 +885,39 @@
                         <i class="material-icons" style="font-size: 16px; margin-right: 4px;">precision_manufacturing</i>
                         AutoBot
                     </button>
+                    <button class="chip" data-type="trending">
+                        <i class="material-icons" style="font-size: 16px; margin-right: 4px;">trending_up</i>
+                        Trending
+                    </button>
+                    <button class="chip" data-type="recent">
+                        <i class="material-icons" style="font-size: 16px; margin-right: 4px;">schedule</i>
+                        Recent
+                    </button>
+                </div>
+
+                <!-- AI Search Toggle -->
+                <div class="ai-search-toggle" style="margin-top: 16px;">
+                    <button class="btn btn-outlined" id="aiSearchToggle" style="width: 100%;">
+                        <i class="material-icons">psychology</i>
+                        AI-Powered Search
+                        <i class="material-icons" style="margin-left: auto;">expand_more</i>
+                    </button>
+                </div>
+
+                <!-- AI Search Panel (Hidden by default) -->
+                <div class="ai-search-panel" id="aiSearchPanel" style="display: none; margin-top: 16px; padding: 16px; background: var(--surface-variant); border-radius: var(--radius-medium); border: 1px solid var(--outline);">
+                    <div class="ai-search-input-container" style="position: relative;">
+                        <textarea 
+                            id="aiSearchInput" 
+                            placeholder="Describe what kind of command you're looking for... (e.g., 'I need a command that can manage user permissions and has moderation features')"
+                            style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid var(--outline); border-radius: var(--radius-small); resize: vertical; font-family: 'Roboto', sans-serif;"
+                        ></textarea>
+                        <button class="btn btn-contained" id="aiSearchBtn" style="margin-top: 8px; width: 100%;">
+                            <i class="material-icons">search</i>
+                            Search with AI
+                        </button>
+                    </div>
+                    <div id="aiSearchResults" style="margin-top: 16px; display: none;"></div>
                 </div>
 
                 <div class="quick-access-card">
@@ -1214,13 +1247,21 @@
                     return text && text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
                 };
 
+                const rating = command.rating || 0;
+                const starRating = this.generateStarRating(rating);
+                const timeAgo = this.timeAgo(command.createdAt);
+
                 return `
-                    <div class="command-card">
+                    <div class="command-card" data-command-id="${command.itemID}">
                         <div class="command-header">
-                            <div class="command-title">${this.escapeHtml(command.itemName)}</div>
+                            <div class="command-meta">
+                                <div class="command-title">${this.escapeHtml(command.itemName)}</div>
+                                <div class="command-rating">${starRating}</div>
+                            </div>
                             <div class="command-author">
                                 <i class="material-icons" style="font-size: 16px;">person</i>
                                 ${this.escapeHtml(command.authorName)}
+                                <span class="command-time" style="margin-left: 8px; opacity: 0.6; font-size: 12px;">${timeAgo}</span>
                             </div>
                         </div>
                         <div class="command-body">
@@ -1228,31 +1269,112 @@
                                 ${this.escapeHtml(truncateText(command.description))}
                             </div>
                             <div class="command-tags">
-                                <span class="tag">
+                                <span class="tag" style="background: ${this.getTypeColor(command.type)};">
                                     <i class="material-icons" style="font-size: 12px; margin-right: 2px;">label</i>
                                     ${command.type}
                                 </span>
-                                ${command.tags ? command.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('') : ''}
+                                ${command.difficulty ? `<span class="tag difficulty-${command.difficulty.toLowerCase()}">${command.difficulty}</span>` : ''}
+                                ${command.tags ? command.tags.slice(0, 3).map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('') : ''}
+                                ${command.tags && command.tags.length > 3 ? `<span class="tag">+${command.tags.length - 3} more</span>` : ''}
                             </div>
                             <div class="command-actions">
-                                <a href="view.html?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
+                                <a href="/view?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
                                     <i class="material-icons">visibility</i>
                                     View
                                 </a>
-                                <button class="btn btn-outlined" onclick="app.likeCommand(${command.itemID})">
-                                    <i class="material-icons">favorite</i>
+                                <button class="btn btn-outlined" onclick="app.likeCommand(${command.itemID})" style="min-width: 80px;">
+                                    <i class="material-icons" style="color: ${command.isLiked ? '#ef4444' : 'inherit'};">favorite</i>
                                     ${command.likes || 0}
+                                </button>
+                                <button class="btn btn-text" onclick="app.shareCommand(${command.itemID})" title="Share">
+                                    <i class="material-icons">share</i>
                                 </button>
                                 <div class="command-stats">
                                     <span>
                                         <i class="material-icons">visibility</i>
-                                        ${command.views || 0}
+                                        ${this.formatNumber(command.views || 0)}
+                                    </span>
+                                    <span>
+                                        <i class="material-icons">download</i>
+                                        ${this.formatNumber(command.downloads || 0)}
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
+            }
+
+            generateStarRating(rating) {
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating % 1 !== 0;
+                const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                
+                let stars = '';
+                for (let i = 0; i < fullStars; i++) {
+                    stars += '<i class="material-icons" style="color: #fbbf24; font-size: 16px;">star</i>';
+                }
+                if (hasHalfStar) {
+                    stars += '<i class="material-icons" style="color: #fbbf24; font-size: 16px;">star_half</i>';
+                }
+                for (let i = 0; i < emptyStars; i++) {
+                    stars += '<i class="material-icons" style="color: #d1d5db; font-size: 16px;">star_border</i>';
+                }
+                return `<div class="star-rating">${stars} <span style="font-size: 12px; margin-left: 4px;">(${rating.toFixed(1)})</span></div>`;
+            }
+
+            getTypeColor(type) {
+                const colors = {
+                    'GoatBot': 'rgba(99, 102, 241, 0.1)',
+                    'MiraiBot': 'rgba(16, 185, 129, 0.1)', 
+                    'AutoBot': 'rgba(245, 158, 11, 0.1)'
+                };
+                return colors[type] || 'rgba(156, 163, 175, 0.1)';
+            }
+
+            timeAgo(dateString) {
+                if (!dateString) return '';
+                const now = new Date();
+                const date = new Date(dateString);
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 30) return `${diffDays}d ago`;
+                return date.toLocaleDateString();
+            }
+
+            formatNumber(num) {
+                if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                return num.toString();
+            }
+
+            async shareCommand(itemID) {
+                const url = `${window.location.origin}/view?id=${itemID}`;
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'Check out this bot command!',
+                            url: url
+                        });
+                    } catch (err) {
+                        this.copyToClipboard(url);
+                    }
+                } else {
+                    this.copyToClipboard(url);
+                }
+            }
+
+            copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    this.showSnackbar('Link copied to clipboard! 📋');
+                }).catch(() => {
+                    this.showSnackbar('Could not copy link', 'error');
+                });
             }
 
             async likeCommand(itemID) {
