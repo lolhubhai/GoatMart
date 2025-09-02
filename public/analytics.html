@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - GoatMart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="top-app-bar">
+        <div class="nav-container">
+            <h1>📊 Analytics Dashboard</h1>
+            <a href="/" class="btn btn-text">
+                <i class="material-icons">home</i>
+                Home
+            </a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card animate-fade-in">
+                    <div class="stat-icon">
+                        <i class="material-icons">trending_up</i>
+                    </div>
+                    <div class="stat-number" id="todayViews">0</div>
+                    <div class="stat-label">Today's Views</div>
+                </div>
+                <div class="stat-card animate-fade-in">
+                    <div class="stat-icon">
+                        <i class="material-icons">favorite</i>
+                    </div>
+                    <div class="stat-number" id="todayLikes">0</div>
+                    <div class="stat-label">Today's Likes</div>
+                </div>
+                <div class="stat-card animate-fade-in">
+                    <div class="stat-icon">
+                        <i class="material-icons">cloud_upload</i>
+                    </div>
+                    <div class="stat-number" id="todayUploads">0</div>
+                    <div class="stat-label">Today's Uploads</div>
+                </div>
+                <div class="stat-card animate-fade-in">
+                    <div class="stat-icon">
+                        <i class="material-icons">people</i>
+                    </div>
+                    <div class="stat-number" id="activeUsers">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>📈 Views Over Time</h3>
+                <canvas id="viewsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>🏆 Top Commands</h3>
+                <canvas id="topCommandsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>📊 Command Types</h3>
+                <canvas id="typesChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>⚡ Real-time Activity</h3>
+                <div id="realtimeActivity" class="activity-feed"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/analytics.js"></script>
+</body>
+</html>

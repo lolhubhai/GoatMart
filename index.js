@@ -383,6 +383,201 @@ app.get('/api/admin/export', verifyAdminToken, async (req, res) => {
   }
 });
 
+// Analytics API endpoint
+app.get('/api/analytics', async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayItems = await Item.find({ createdAt: { $gte: today } });
+    const todayViews = todayItems.reduce((sum, item) => sum + item.views, 0);
+    const todayLikes = todayItems.reduce((sum, item) => sum + item.likes, 0);
+    const todayUploads = todayItems.length;
+    
+    const activeUsers = await Item.distinct('authorName', {
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    });
+    
+    const hourlyData = [];
+    for (let i = 0; i < 24; i++) {
+      const hourStart = new Date(today);
+      hourStart.setHours(i);
+      const hourEnd = new Date(today);
+      hourEnd.setHours(i + 1);
+      
+      const hourViews = await Item.aggregate([
+        { $match: { createdAt: { $gte: hourStart, $lt: hourEnd } } },
+        { $group: { _id: null, total: { $sum: '$views' } } }
+      ]);
+      
+      hourlyData.push(hourViews[0]?.total || 0);
+    }
+    
+    res.json({
+      todayViews,
+      todayLikes,
+      todayUploads,
+      activeUsers: activeUsers.length,
+      hourlyData,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Analytics error:', error);
+    res.status(500).json({ error: 'Error fetching analytics' });
+  }
+});
+
+// Trending keywords API
+app.get('/api/trending-keywords', async (req, res) => {
+  try {
+    const keywords = await Item.aggregate([
+      { $unwind: '$tags' },
+      { $group: { _id: '$tags', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+      { $project: { _id: 0, keyword: '$_id', count: 1 } }
+    ]);
+    
+    const trendingKeywords = keywords.map(k => k.keyword);
+    res.json(trendingKeywords);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching trending keywords' });
+  }
+});
+
+// Advanced search API
+app.get('/api/search/semantic', async (req, res) => {
+  try {
+    const { q, keywords } = req.query;
+    const keywordArray = keywords ? keywords.split(',') : [];
+    
+    let query = {};
+    if (q) {
+      query.$or = [
+        { itemName: { $regex: q, $options: 'i' } },
+        { description: { $regex: q, $options: 'i' } },
+        { tags: { $in: keywordArray } }
+      ];
+    }
+    
+    const items = await Item.find(query)
+      .sort({ views: -1, likes: -1 })
+      .limit(20);
+    
+    // Generate AI-powered suggestions
+    const suggestions = await generateSearchSuggestions(q, keywordArray);
+    
+    res.json({
+      items: items.map(item => ({
+        ...item.toObject(),
+        code: undefined,
+        rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`
+      })),
+      suggestions,
+      query: q,
+      keywords: keywordArray
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Search error' });
+  }
+});
+
+// Code validation API
+app.post('/api/validate-code', async (req, res) => {
+  try {
+    const { code, language } = req.body;
+    
+    // Basic validation based on language
+    const validation = validateCodeSyntax(code, language);
+    
+    res.json({
+      isValid: validation.isValid,
+      errors: validation.errors,
+      warnings: validation.warnings,
+      suggestions: validation.suggestions
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Validation error' });
+  }
+});
+
+// User profile API
+app.get('/api/user/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+    const userItems = await Item.find({ authorName: username })
+      .sort({ createdAt: -1 });
+    
+    const totalLikes = userItems.reduce((sum, item) => sum + item.likes, 0);
+    const totalViews = userItems.reduce((sum, item) => sum + item.views, 0);
+    
+    const profile = {
+      username,
+      totalCommands: userItems.length,
+      totalLikes,
+      totalViews,
+      joinDate: userItems[userItems.length - 1]?.createdAt || new Date(),
+      recentCommands: userItems.slice(0, 5).map(item => ({
+        ...item.toObject(),
+        code: undefined
+      })),
+      achievements: generateUserAchievements(userItems, totalLikes, totalViews)
+    };
+    
+    res.json(profile);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching user profile' });
+  }
+});
+
+// Helper functions
+async function generateSearchSuggestions(query, keywords) {
+  const suggestions = [
+    `${query} tutorial`,
+    `advanced ${query}`,
+    `${query} examples`,
+    `${query} for beginners`
+  ];
+  return suggestions.slice(0, 5);
+}
+
+function validateCodeSyntax(code, language) {
+  const result = {
+    isValid: true,
+    errors: [],
+    warnings: [],
+    suggestions: []
+  };
+  
+  if (language === 'javascript') {
+    // Basic JavaScript validation
+    if (!code.includes('module.exports') && !code.includes('export')) {
+      result.warnings.push('Consider adding module.exports for better compatibility');
+    }
+    if (code.includes('console.log')) {
+      result.suggestions.push('Replace console.log with proper logging for production');
+    }
+  }
+  
+  if (code.length < 50) {
+    result.warnings.push('Code seems quite short. Consider adding more functionality.');
+  }
+  
+  return result;
+}
+
+function generateUserAchievements(items, likes, views) {
+  const achievements = [];
+  
+  if (items.length >= 1) achievements.push({ name: 'First Upload', icon: '🚀', unlocked: true });
+  if (items.length >= 5) achievements.push({ name: 'Active Creator', icon: '⭐', unlocked: true });
+  if (items.length >= 10) achievements.push({ name: 'Command Master', icon: '👑', unlocked: true });
+  if (likes >= 100) achievements.push({ name: 'Popular Creator', icon: '❤️', unlocked: true });
+  if (views >= 1000) achievements.push({ name: 'Viral Creator', icon: '🔥', unlocked: true });
+  
+  return achievements;
+}
+
 // Admin logs endpoint
 app.get('/api/admin/logs', verifyAdminToken, (req, res) => {
   const logs = `

@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - GoatMart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header class="top-app-bar">
+        <div class="nav-container">
+            <h1>👤 User Profile</h1>
+            <div class="nav-actions">
+                <button class="btn btn-text" onclick="editProfile()">
+                    <i class="material-icons">edit</i>
+                    Edit
+                </button>
+                <a href="/" class="btn btn-text">
+                    <i class="material-icons">home</i>
+                    Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=120" alt="User Avatar">
+                <div class="level-badge" id="userLevel">Level 5</div>
+            </div>
+            <div class="profile-info">
+                <h2 id="userName">Anonymous User</h2>
+                <p id="userBio">Bot developer and GoatMart enthusiast</p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="userCommands">15</span>
+                        <span class="stat-label">Commands</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="userLikes">243</span>
+                        <span class="stat-label">Likes</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="userFollowers">67</span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="userStreak">12</span>
+                        <span class="stat-label">Day Streak</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <button class="tab-btn active" data-tab="commands">📝 Commands</button>
+            <button class="tab-btn" data-tab="achievements">🏆 Achievements</button>
+            <button class="tab-btn" data-tab="activity">📈 Activity</button>
+            <button class="tab-btn" data-tab="followers">👥 Social</button>
+        </div>
+
+        <div class="tab-content">
+            <div id="commands-tab" class="tab-panel active">
+                <div id="userCommandsList" class="commands-grid"></div>
+            </div>
+
+            <div id="achievements-tab" class="tab-panel">
+                <div class="achievements-grid">
+                    <div class="achievement unlocked">
+                        <div class="achievement-icon">🚀</div>
+                        <div class="achievement-info">
+                            <h4>First Upload</h4>
+                            <p>Uploaded your first command</p>
+                        </div>
+                    </div>
+                    <div class="achievement unlocked">
+                        <div class="achievement-icon">❤️</div>
+                        <div class="achievement-info">
+                            <h4>Liked by Many</h4>
+                            <p>Received 100+ likes</p>
+                        </div>
+                    </div>
+                    <div class="achievement locked">
+                        <div class="achievement-icon">🔥</div>
+                        <div class="achievement-info">
+                            <h4>Trending Creator</h4>
+                            <p>Have a command in trending</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="activity-tab" class="tab-panel">
+                <div class="activity-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4>🆕 Uploaded "Music Bot v2"</h4>
+                            <p>2 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4>❤️ Liked "Auto Moderation"</h4>
+                            <p>5 hours ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="followers-tab" class="tab-panel">
+                <div class="social-section">
+                    <div class="followers-list">
+                        <h3>Followers (67)</h3>
+                        <div id="followersList"></div>
+                    </div>
+                    <div class="following-list">
+                        <h3>Following (23)</h3>
+                        <div id="followingList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

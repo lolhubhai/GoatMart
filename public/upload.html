@@ -1,28 +1,35 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Upload Command - GoatMart</title>
-    
+
     <!-- Theme Color for Android -->
     <meta name="theme-color" content="#6366f1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Material+Icons+Outlined&family=Material+Icons&display=swap" rel="stylesheet">
-    
+
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/xq-light.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/xq-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/github.min.css">
+
     <link rel="stylesheet" href="css/mobile.css">
-    
+
     <style>
         /* Android Material Design Variables */
         :root {
@@ -185,6 +192,52 @@
             resize: vertical;
         }
 
+        /* Code Editor Styling */
+        .editor-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 8px;
+            background: var(--surface);
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: var(--radius-small) var(--radius-small) 0 0;
+        }
+
+        .editor-toolbar .btn-text {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+        }
+
+        .editor-toolbar .btn-text:hover {
+            background: rgba(99, 102, 241, 0.04);
+            border-radius: var(--radius-small);
+        }
+
+        .code-editor {
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 0 0 var(--radius-small) var(--radius-small);
+            border-top: none;
+        }
+
+        .CodeMirror {
+            height: 300px; /* Adjust height as needed */
+            border-radius: var(--radius-small);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .cm-s-default {
+            border-radius: var(--radius-small);
+        }
+        /* End Code Editor Styling */
+
         /* Material Design Buttons */
         .btn {
             border: none;
@@ -283,7 +336,7 @@
             <div class="upload-card">
                 <h1 class="upload-title">Share Your Command</h1>
                 <p class="upload-subtitle">Upload your bot command to help the community</p>
-                
+
                 <div id="message" class="message"></div>
 
                 <form id="uploadForm">
@@ -292,7 +345,7 @@
                             <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">title</i>
                             Command Name
                         </label>
-                        <input type="text" id="itemName" name="itemName" class="form-input" required 
+                        <input type="text" id="itemName" name="itemName" class="form-input" required
                                placeholder="Enter your command name">
                     </div>
 
@@ -314,7 +367,7 @@
                             <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">person</i>
                             Author Name
                         </label>
-                        <input type="text" id="authorName" name="authorName" class="form-input" required 
+                        <input type="text" id="authorName" name="authorName" class="form-input" required
                                placeholder="Your name">
                     </div>
 
@@ -323,17 +376,40 @@
                             <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">description</i>
                             Description
                         </label>
-                        <textarea id="description" name="description" class="form-textarea" required 
+                        <textarea id="description" name="description" class="form-textarea" required
                                   placeholder="Describe what your command does"></textarea>
                     </div>
 
+                    <!-- Updated form-group for code editor -->
                     <div class="form-group">
                         <label class="form-label" for="code">
                             <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">code</i>
                             Command Code
                         </label>
-                        <textarea id="code" name="code" class="form-textarea" required 
-                                  placeholder="Paste your command code here" style="min-height: 200px; font-family: 'Courier New', monospace;"></textarea>
+                        <div class="editor-toolbar">
+                            <select id="editorTheme" onchange="changeEditorTheme()">
+                                <option value="default">Default</option>
+                                <option value="dark">Dark</option>
+                                <option value="monokai">Monokai</option>
+                                <option value="github">GitHub</option>
+                            </select>
+                            <select id="editorLanguage" onchange="changeEditorLanguage()">
+                                <option value="javascript">JavaScript</option>
+                                <option value="python">Python</option>
+                                <option value="json">JSON</option>
+                                <option value="markdown">Markdown</option>
+                            </select>
+                            <button type="button" onclick="formatCode()" class="btn btn-text">
+                                <i class="material-icons">code</i>
+                                Format
+                            </button>
+                            <button type="button" onclick="validateCode()" class="btn btn-text">
+                                <i class="material-icons">check_circle</i>
+                                Validate
+                            </button>
+                        </div>
+                        <div id="codeEditor" class="code-editor"></div>
+                        <textarea id="code" name="code" style="display: none;" required></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-contained">
@@ -347,25 +423,108 @@
 
     <!-- JavaScript -->
     <script src="js/android-ui.js"></script>
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/json/json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/formatDoc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/matchbrackets.min.js"></script>
+
     <script>
+        // Initialize CodeMirror editor
+        var codeEditor = CodeMirror(document.getElementById("codeEditor"), {
+            lineNumbers: true,
+            matchBrackets: true,
+            mode: "javascript", // Default mode
+            theme: "default",   // Default theme
+            lineWrapping: true,
+            autofocus: true,
+            value: "" // Initial value, will be populated from textarea
+        });
+
+        // Sync textarea with CodeMirror editor
+        codeEditor.on("change", function(instance) {
+            document.getElementById("code").value = instance.getValue();
+        });
+
+        // Load initial value from textarea if any
+        document.getElementById("code").addEventListener('input', function() {
+            codeEditor.setValue(this.value);
+        });
+
+        function changeEditorTheme() {
+            const theme = document.getElementById("editorTheme").value;
+            codeEditor.setOption("theme", theme);
+        }
+
+        function changeEditorLanguage() {
+            const lang = document.getElementById("editorLanguage").value;
+            codeEditor.setOption("mode", lang);
+        }
+
+        function formatCode() {
+            codeEditor.autoFormatRange({line: 0, ch: 0}, {line: codeEditor.lastLine()});
+        }
+
+        function validateCode() {
+            // Basic validation example: check for syntax errors in JavaScript
+            // For more robust validation, you'd need a proper linter or parser
+            const currentMode = codeEditor.getOption("mode");
+            const code = codeEditor.getValue();
+            let isValid = true;
+            let errorMessage = '';
+
+            if (currentMode === "javascript") {
+                try {
+                    // Use a simple eval for basic syntax check, be cautious with eval in production
+                    // A better approach would be using a library like esprima or acorn
+                    new Function(code);
+                } catch (e) {
+                    isValid = false;
+                    errorMessage = e.message;
+                }
+            } else if (currentMode === "python") {
+                // Python validation is more complex, this is a placeholder
+                // You would typically use a Python linter or AST parser
+                if (code.trim() === "") {
+                    isValid = false;
+                    errorMessage = "Python code cannot be empty.";
+                }
+            }
+            // Add more validation for other languages as needed
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.style.display = 'block';
+            if (isValid) {
+                messageDiv.className = 'message success';
+                messageDiv.innerHTML = '<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</i> Code is valid.';
+            } else {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = `<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">error</i> Code validation failed: ${errorMessage}`;
+            }
+        }
+
+
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const messageDiv = document.getElementById('message');
             const submitBtn = e.target.querySelector('button[type="submit"]');
-            
+
             // Show loading state
             submitBtn.innerHTML = '<i class="material-icons">hourglass_empty</i> Uploading...';
             submitBtn.disabled = true;
-            
+
             const formData = {
                 itemName: document.getElementById('itemName').value,
                 type: document.getElementById('type').value,
                 authorName: document.getElementById('authorName').value,
                 description: document.getElementById('description').value,
-                code: document.getElementById('code').value
+                code: document.getElementById('code').value // Get code from the hidden textarea
             };
-            
+
             try {
                 const response = await fetch('/v1/paste', {
                     method: 'POST',
@@ -374,9 +533,9 @@
                     },
                     body: JSON.stringify(formData)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     messageDiv.className = 'message success';
                     messageDiv.style.display = 'block';
@@ -384,15 +543,16 @@
                         <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">check_circle</i>
                         Command uploaded successfully! <a href="view.html?id=${result.itemID}" style="color: var(--secondary); text-decoration: underline;">View your command</a>
                     `;
-                    
+
                     // Reset form
                     e.target.reset();
-                    
+                    codeEditor.setValue(''); // Clear the editor
+
                     // Show snackbar
                     if (window.AndroidUI) {
                         AndroidUI.showSnackbar('Command uploaded successfully! 🎉');
                     }
-                    
+
                     // Redirect after 2 seconds
                     setTimeout(() => {
                         window.location.href = `view.html?id=${result.itemID}`;
@@ -407,7 +567,7 @@
                     <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">error</i>
                     Error: ${error.message}
                 `;
-                
+
                 if (window.AndroidUI) {
                     AndroidUI.showSnackbar('Upload failed. Please try again.', null, 3000);
                 }

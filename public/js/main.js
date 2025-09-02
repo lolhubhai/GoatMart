@@ -73,11 +73,35 @@ class GoatMartApp {
     }
 
     setupSearchAndFilters() {
-        // Search functionality
+        // Enhanced search functionality with AI suggestions
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             // Clear any existing listeners
             searchInput.removeEventListener('input', this.searchHandler);
+            
+            // Create search suggestions dropdown
+            this.createSearchSuggestions(searchInput);
+            
+            // Advanced search with debouncing
+            this.searchHandler = this.debounce(async (e) => {
+                const query = e.target.value.trim();
+                if (query.length > 1) {
+                    await this.performAdvancedSearch(query);
+                    this.showSearchSuggestions(query);
+                } else {
+                    this.hideSearchSuggestions();
+                }
+            }, 300);
+            
+            searchInput.addEventListener('input', this.searchHandler);
+            searchInput.addEventListener('focus', () => this.showRecentSearches());
+            
+            // Voice search support
+            this.setupVoiceSearch(searchInput);
+        }
+        
+        // Advanced filters
+        this.setupAdvancedFilters();dler);
 
             // Create bound search handler
             this.searchHandler = this.debounce((e) => {
