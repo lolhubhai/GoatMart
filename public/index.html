@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>GoatMart - A Commands hub Website</title>
+    <title>GoatMart - Commands Hub</title>
 
     <!-- Theme Color for Android -->
     <meta name="theme-color" content="#6366f1">
@@ -11,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-    <!-- Open Graph Meta Tags for Link Sharing -->
+    <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="GoatMart">
     <meta property="og:title" content="GoatMart - Bot Command Hub">
@@ -19,25 +20,10 @@
     <meta property="og:image" content="/assets/logo.png">
     <meta property="og:url" content="/">
 
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@GoatMart">
-    <meta name="twitter:title" content="GoatMart - Bot Command Hub">
-    <meta name="twitter:description" content="Discover, share, and explore amazing bot commands for GoatBot, MiraiBot, and AutoBot. Join the community!">
-    <meta name="twitter:image" content="/assets/logo.png">
-
-    <!-- Regular Meta Tags -->
-    <meta name="description" content="Discover, share, and explore amazing bot commands for GoatBot, MiraiBot, and AutoBot. Join the community!">
-    <meta name="keywords" content="bot commands, goatbot, miraibot, autobot, code sharing, programming">
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Material+Icons+Outlined&family=Material+Icons&display=swap" rel="stylesheet">
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Material+Icons&display=swap" rel="stylesheet">
 
     <style>
         /* Android Material Design Variables */
@@ -53,13 +39,16 @@
             --on-secondary: #ffffff;
             --on-surface: #1f2937;
             --on-background: #374151;
+            --surface-variant: #f3f4f6;
+            --outline: #d1d5db;
+            --outline-variant: #e5e7eb;
             --elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
             --elevation-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
             --elevation-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
             --elevation-4: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
             --elevation-5: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
-            --radius-small: 4px;
-            --radius-medium: 8px;
+            --radius-small: 8px;
+            --radius-medium: 12px;
             --radius-large: 16px;
             --radius-extra-large: 28px;
         }
@@ -82,7 +71,7 @@
             overflow-x: hidden;
         }
 
-        /* Material Design Top App Bar */
+        /* Top App Bar */
         .top-app-bar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -96,7 +85,7 @@
             align-items: center;
             padding: 0 16px;
             box-shadow: var(--elevation-2);
-            border-bottom: 1px solid rgba(0,0,0,0.12);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
         }
 
         .app-bar-content {
@@ -143,15 +132,13 @@
             gap: 8px;
         }
 
-        /* Material Design Buttons */
+        /* Buttons */
         .btn {
             border: none;
             border-radius: var(--radius-large);
             font-family: 'Roboto', sans-serif;
             font-weight: 500;
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
@@ -161,6 +148,8 @@
             position: relative;
             overflow: hidden;
             text-decoration: none;
+            min-height: 40px;
+            padding: 0 16px;
         }
 
         .btn-fab {
@@ -185,7 +174,6 @@
         .btn-contained {
             background: var(--primary);
             color: var(--on-primary);
-            padding: 12px 24px;
             box-shadow: var(--elevation-1);
         }
 
@@ -198,7 +186,6 @@
             background: transparent;
             color: var(--primary);
             border: 1px solid var(--primary);
-            padding: 11px 23px;
         }
 
         .btn-outlined:hover {
@@ -208,30 +195,10 @@
         .btn-text {
             background: transparent;
             color: var(--primary);
-            padding: 12px 16px;
         }
 
         .btn-text:hover {
             background: rgba(99, 102, 241, 0.04);
-        }
-
-        /* Ripple Effect */
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
-
-        .btn:active::before {
-            width: 300px;
-            height: 300px;
         }
 
         /* Main Content */
@@ -240,29 +207,48 @@
             min-height: calc(100vh - 64px);
         }
 
-        /* Hero Section with Android Design */
+        /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
             color: var(--on-primary);
-            padding: 48px 16px;
+            padding: 64px 16px;
             text-align: center;
             position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+            z-index: 0;
         }
 
         .hero-content {
             max-width: 800px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .hero-title {
-            font-size: clamp(28px, 6vw, 48px);
-            font-weight: 400;
+            font-size: clamp(32px, 6vw, 56px);
+            font-weight: 700;
             margin-bottom: 16px;
             line-height: 1.2;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero-subtitle {
-            font-size: clamp(16px, 3vw, 20px);
+            font-size: clamp(16px, 3vw, 24px);
             opacity: 0.9;
             margin-bottom: 32px;
             font-weight: 300;
@@ -272,79 +258,98 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 24px;
-            margin-top: 32px;
+            margin-top: 48px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-stat {
             text-align: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-large);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .hero-stat-number {
-            font-size: 32px;
-            font-weight: 300;
+            font-size: 28px;
+            font-weight: 700;
             display: block;
+            margin-bottom: 4px;
         }
 
         .hero-stat-label {
-            font-size: 14px;
+            font-size: 12px;
             opacity: 0.8;
-            font-weight: 400;
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* Material Design Cards */
-        .card-container {
-            padding: 16px;
+        /* Search Section */
+        .search-section {
+            padding: 24px 16px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .search-card {
             background: var(--surface);
-            border-radius: var(--radius-large);
-            padding: 24px;
-            margin: -32px 16px 24px;
+            border-radius: var(--radius-extra-large);
+            padding: 32px 24px;
+            margin: -48px 16px 24px;
             box-shadow: var(--elevation-3);
             position: relative;
             z-index: 10;
+            border: 1px solid var(--outline-variant);
         }
 
         .search-input-container {
             position: relative;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .search-input {
             width: 100%;
             height: 56px;
-            border: 1px solid rgba(0,0,0,0.12);
-            border-radius: var(--radius-small);
-            padding: 0 48px 0 56px;
+            border: 2px solid var(--outline);
+            border-radius: var(--radius-extra-large);
+            padding: 0 24px 0 56px;
             font-size: 16px;
             font-family: 'Roboto', sans-serif;
             background: var(--surface);
             color: var(--on-surface);
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .search-input:focus {
             outline: none;
             border-color: var(--primary);
-            border-width: 2px;
-            padding-left: 55px;
-            padding-right: 47px;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--on-surface);
+            opacity: 0.6;
+            font-size: 24px;
         }
 
         .search-clear-btn {
             position: absolute;
-            right: 12px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: rgba(0,0,0,0.54);
+            color: var(--on-surface);
+            opacity: 0.6;
             cursor: pointer;
             padding: 8px;
             border-radius: 50%;
@@ -352,75 +357,16 @@
         }
 
         .search-clear-btn:hover {
-            background: rgba(0,0,0,0.04);
-            color: var(--primary);
+            background: var(--surface-variant);
+            opacity: 1;
         }
 
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(0,0,0,0.54);
-            font-size: 24px;
-        }
-
-        /* Quick Access Search Box */
-        .quick-access-container {
-            margin-top: 24px;
-            background: var(--surface);
-            padding: 20px;
-            border-radius: var(--radius-large);
-            box-shadow: var(--elevation-1);
-            border: 1px solid rgba(0,0,0,0.06);
-        }
-
-        .quick-access-input-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .quick-access-input-container .material-icons {
-            color: rgba(0,0,0,0.54);
-            font-size: 24px;
-        }
-
-        .quick-access-input {
-            flex-grow: 1;
-            height: 56px;
-            border: 1px solid rgba(0,0,0,0.12);
-            border-radius: var(--radius-small);
-            padding: 0 16px 0 48px;
-            font-size: 16px;
-            font-family: 'Roboto', sans-serif;
-            background: var(--surface);
-            color: var(--on-surface);
-            transition: all 0.2s ease;
-        }
-
-        .quick-access-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            border-width: 2px;
-            padding-left: 47px;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
-        }
-
-        .quick-access-btn {
-            height: 56px;
-            padding: 0 24px;
-            flex-shrink: 0;
-        }
-
-
-        /* Material Design Chips */
+        /* Chips */
         .chip-container {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             overflow-x: auto;
-            padding: 4px 0;
+            padding: 8px 0;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -430,16 +376,16 @@
         }
 
         .chip {
-            background: rgba(99, 102, 241, 0.12);
-            color: var(--primary);
-            border: 1px solid rgba(99, 102, 241, 0.12);
-            border-radius: 16px;
+            background: var(--surface-variant);
+            color: var(--on-surface);
+            border: 1px solid var(--outline);
+            border-radius: 20px;
             padding: 8px 16px;
             font-size: 14px;
             font-weight: 500;
             white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
@@ -448,38 +394,88 @@
             background: var(--primary);
             color: var(--on-primary);
             border-color: var(--primary);
+            box-shadow: var(--elevation-1);
         }
 
         .chip:hover:not(.active) {
-            background: rgba(99, 102, 241, 0.20);
+            background: var(--outline-variant);
+            transform: translateY(-2px);
+            box-shadow: var(--elevation-1);
         }
 
-        /* Stats Grid */
+        /* Quick Access */
+        .quick-access-card {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 20px;
+            margin-top: 16px;
+            box-shadow: var(--elevation-1);
+            border: 1px solid var(--outline-variant);
+        }
+
+        .quick-access-input-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quick-access-input {
+            flex: 1;
+            height: 48px;
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-medium);
+            padding: 0 16px;
+            font-size: 16px;
+            background: var(--surface);
+            color: var(--on-surface);
+            transition: all 0.2s ease;
+        }
+
+        .quick-access-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Stats Section */
         .stats-section {
-            padding: 32px 16px;
-            background: var(--background);
+            padding: 48px 16px;
+            background: var(--surface);
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
+            gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .stat-card {
             background: var(--surface);
-            border-radius: var(--radius-medium);
+            border-radius: var(--radius-large);
             padding: 24px;
             text-align: center;
             box-shadow: var(--elevation-1);
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--outline-variant);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
 
         .stat-card:hover {
-            box-shadow: var(--elevation-2);
-            transform: translateY(-2px);
+            box-shadow: var(--elevation-3);
+            transform: translateY(-4px);
         }
 
         .stat-icon {
@@ -497,7 +493,7 @@
 
         .stat-number {
             font-size: 32px;
-            font-weight: 300;
+            font-weight: 700;
             color: var(--on-surface);
             margin-bottom: 8px;
         }
@@ -508,72 +504,103 @@
             opacity: 0.7;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 500;
         }
 
-        /* Commands Grid */
+        /* Commands Section */
         .commands-section {
-            padding: 32px 16px;
-            background: var(--surface);
+            padding: 48px 16px;
+            background: var(--background);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 32px;
         }
 
         .section-title {
-            font-size: 24px;
-            font-weight: 400;
-            margin-bottom: 24px;
-            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
             color: var(--on-surface);
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            color: var(--on-surface);
+            opacity: 0.7;
         }
 
         .commands-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .command-card {
             background: var(--surface);
-            border-radius: var(--radius-medium);
+            border-radius: var(--radius-large);
             box-shadow: var(--elevation-1);
             overflow: hidden;
-            transition: all 0.2s;
-            border: 1px solid rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--outline-variant);
+            position: relative;
+        }
+
+        .command-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .command-card:hover {
-            box-shadow: var(--elevation-2);
-            transform: translateY(-2px);
+            box-shadow: var(--elevation-3);
+            transform: translateY(-6px);
+        }
+
+        .command-card:hover::before {
+            opacity: 1;
         }
 
         .command-header {
-            padding: 16px;
-            background: var(--background);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 20px 20px 16px;
+            background: linear-gradient(135deg, var(--surface-variant), var(--background));
         }
 
         .command-title {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 4px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
             color: var(--on-surface);
+            line-height: 1.3;
         }
 
         .command-author {
             font-size: 14px;
             color: var(--on-surface);
             opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .command-body {
-            padding: 16px;
+            padding: 0 20px 20px;
         }
 
         .command-description {
             font-size: 14px;
             color: var(--on-surface);
             opacity: 0.8;
-            line-height: 1.4;
+            line-height: 1.5;
             margin-bottom: 16px;
         }
 
@@ -585,7 +612,7 @@
         }
 
         .tag {
-            background: rgba(99, 102, 241, 0.12);
+            background: rgba(99, 102, 241, 0.1);
             color: var(--primary);
             padding: 4px 8px;
             border-radius: 12px;
@@ -596,6 +623,22 @@
         .command-actions {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+
+        .command-stats {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+            color: var(--on-surface);
+            opacity: 0.6;
+            font-size: 12px;
+        }
+
+        .command-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         /* Loading State */
@@ -605,14 +648,14 @@
             justify-content: center;
             align-items: center;
             padding: 64px 16px;
-            color: var(--on-primary);
+            color: var(--on-surface);
         }
 
         .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid var(--on-primary);
+            border: 4px solid var(--outline-variant);
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 16px;
@@ -625,7 +668,7 @@
 
         .loading-text {
             font-size: 16px;
-            font-weight: 400;
+            font-weight: 500;
         }
 
         /* Bottom Navigation for Mobile */
@@ -635,9 +678,10 @@
             left: 0;
             right: 0;
             background: var(--surface);
-            border-top: 1px solid rgba(0,0,0,0.12);
+            border-top: 1px solid var(--outline-variant);
             display: none;
             z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .bottom-nav-content {
@@ -650,17 +694,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px;
+            padding: 8px 12px;
             color: var(--on-surface);
             opacity: 0.6;
             text-decoration: none;
-            transition: opacity 0.2s;
+            transition: all 0.2s ease;
             font-size: 12px;
+            border-radius: var(--radius-medium);
+            min-width: 64px;
         }
 
         .bottom-nav-item.active {
             opacity: 1;
             color: var(--primary);
+            background: rgba(99, 102, 241, 0.08);
         }
 
         .bottom-nav-item .material-icons {
@@ -674,37 +721,32 @@
                 display: none;
             }
 
-            .app-bar-actions .btn-contained {
-                padding: 8px 16px;
-                font-size: 12px;
-            }
-
             .hero-section {
-                padding: 32px 16px;
+                padding: 48px 16px;
             }
 
             .search-card {
-                margin: -16px 8px 16px;
-                padding: 16px;
+                margin: -32px 8px 16px;
+                padding: 24px 16px;
+                border-radius: var(--radius-large);
             }
 
-            .card-container {
-                padding: 8px;
+            .search-section {
+                padding: 16px 8px;
             }
 
             .stats-section,
             .commands-section {
-                padding: 24px 8px;
+                padding: 32px 8px;
             }
 
             .commands-grid {
                 grid-template-columns: 1fr;
-                gap: 12px;
+                gap: 16px;
             }
 
             .bottom-nav {
                 display: block;
-                padding-bottom: env(safe-area-inset-bottom);
             }
 
             .main-content {
@@ -713,6 +755,33 @@
 
             .btn-fab {
                 display: none;
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --surface: #1e1e1e;
+                --background: #121212;
+                --surface-variant: #2a2a2a;
+                --on-surface: #ffffff;
+                --on-background: #ffffff;
+                --outline: #404040;
+                --outline-variant: #333333;
+            }
+
+            .top-app-bar {
+                background: rgba(30, 30, 30, 0.95);
             }
         }
 
@@ -725,29 +794,15 @@
             }
         }
 
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --surface: #121212;
-                --background: #1e1e1e;
-                --on-surface: #ffffff;
-                --on-background: #ffffff;
-            }
-
-            .top-app-bar {
-                background: rgba(18, 18, 18, 0.95);
-            }
-
-            .search-input {
-                background: var(--surface);
-                color: var(--on-surface);
-                border-color: rgba(255, 255, 255, 0.12);
-            }
+        /* Focus styles for keyboard navigation */
+        .keyboard-navigation *:focus {
+            outline: 2px solid var(--primary) !important;
+            outline-offset: 2px !important;
         }
     </style>
 </head>
 <body>
-    <!-- Material Design Top App Bar -->
+    <!-- Top App Bar -->
     <header class="top-app-bar">
         <div class="app-bar-content">
             <div class="app-bar-title">
@@ -760,12 +815,12 @@
                 </div>
             </div>
             <div class="app-bar-actions">
-                <a href="admin.html" class="btn btn-outlined" style="margin-right: 8px;">
-                    <i class="material-icons" style="font-size: 18px;">admin_panel_settings</i>
+                <a href="admin.html" class="btn btn-outlined">
+                    <i class="material-icons">admin_panel_settings</i>
                     <span>Admin</span>
                 </a>
                 <a href="upload.html" class="btn btn-contained">
-                    <i class="material-icons" style="font-size: 18px;">add</i>
+                    <i class="material-icons">add</i>
                     <span>Upload</span>
                 </a>
             </div>
@@ -782,8 +837,8 @@
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-content">
-                <h1 class="hero-title">Commands Sharing Website</h1>
-                <p class="hero-subtitle">Project credits to Aryan Chauhan</p>
+                <h1 class="hero-title">Commands Sharing Platform</h1>
+                <p class="hero-subtitle">Discover, share, and explore amazing bot commands</p>
 
                 <div class="hero-stats">
                     <div class="hero-stat">
@@ -802,8 +857,8 @@
             </div>
         </section>
 
-        <!-- Search Card -->
-        <div class="card-container">
+        <!-- Search Section -->
+        <section class="search-section">
             <div class="search-card">
                 <div class="search-input-container">
                     <i class="material-icons search-icon">search</i>
@@ -814,36 +869,48 @@
                 </div>
 
                 <div class="chip-container">
-                    <button class="chip active" data-type="all">All Commands</button>
-                    <button class="chip" data-type="GoatBot">GoatBot</button>
-                    <button class="chip" data-type="MiraiBot">MiraiBot</button>
-                    <button class="chip" data-type="AutoBot">AutoBot</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Access Search Box -->
-        <div class="card-container">
-            <div class="quick-access-container">
-                <div class="quick-access-input-container">
-                    <i class="material-icons">tag</i>
-                    <input 
-                        type="number" 
-                        id="quickAccessInput" 
-                        class="quick-access-input" 
-                        placeholder="Enter command ID (1, 2, 3...)"
-                        min="1"
-                    >
-                    <button class="btn btn-contained quick-access-btn" id="quickAccessBtn">
-                        <i class="material-icons">launch</i>
-                        Go
+                    <button class="chip active" data-type="all">
+                        <i class="material-icons" style="font-size: 16px; margin-right: 4px;">apps</i>
+                        All Commands
+                    </button>
+                    <button class="chip" data-type="GoatBot">
+                        <i class="material-icons" style="font-size: 16px; margin-right: 4px;">smart_toy</i>
+                        GoatBot
+                    </button>
+                    <button class="chip" data-type="MiraiBot">
+                        <i class="material-icons" style="font-size: 16px; margin-right: 4px;">android</i>
+                        MiraiBot
+                    </button>
+                    <button class="chip" data-type="AutoBot">
+                        <i class="material-icons" style="font-size: 16px; margin-right: 4px;">precision_manufacturing</i>
+                        AutoBot
                     </button>
                 </div>
+
+                <div class="quick-access-card">
+                    <div class="quick-access-input-container">
+                        <input 
+                            type="number" 
+                            id="quickAccessInput" 
+                            class="quick-access-input" 
+                            placeholder="Enter command ID (1, 2, 3...)"
+                            min="1"
+                        >
+                        <button class="btn btn-contained" id="quickAccessBtn">
+                            <i class="material-icons">launch</i>
+                            Go
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
 
         <!-- Statistics Section -->
         <section class="stats-section">
+            <div class="section-header">
+                <h2 class="section-title">Platform Statistics</h2>
+                <p class="section-subtitle">Real-time data from our growing community</p>
+            </div>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">
@@ -853,21 +920,21 @@
                     <div class="stat-label">Total Commands</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
                         <i class="material-icons">favorite</i>
                     </div>
                     <div class="stat-number" id="totalLikes">-</div>
                     <div class="stat-label">Total Likes</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-variant));">
                         <i class="material-icons">people</i>
                     </div>
                     <div class="stat-number" id="activeUsers">-</div>
                     <div class="stat-label">Active Users</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
                         <i class="material-icons">share</i>
                     </div>
                     <div class="stat-number" id="totalShares">-</div>
@@ -878,7 +945,10 @@
 
         <!-- Commands Section -->
         <section class="commands-section">
-            <h2 class="section-title">Featured Commands</h2>
+            <div class="section-header">
+                <h2 class="section-title">Featured Commands</h2>
+                <p class="section-subtitle">Discover the most popular and recently added commands</p>
+            </div>
             <div class="commands-grid" id="commandsContainer">
                 <div class="loading">
                     <div class="loading-spinner"></div>
@@ -895,7 +965,7 @@
                 <i class="material-icons">home</i>
                 <span>Home</span>
             </a>
-            <a href="#" class="bottom-nav-item">
+            <a href="#" class="bottom-nav-item" onclick="document.getElementById('searchInput').focus()">
                 <i class="material-icons">search</i>
                 <span>Search</span>
             </a>
@@ -911,331 +981,395 @@
     </nav>
 
     <!-- JavaScript -->
-    <script src="js/main.js"></script>
+    <script src="js/android-ui.js"></script>
     <script>
-        // Additional initialization after main app loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // App is already initialized via main.js
-            console.log('GoatMart app initialized successfully');
-
-            // Enhanced search functionality
-            const searchInput = document.getElementById('searchInput');
-            const searchClearBtn = document.getElementById('searchClearBtn');
-            const quickAccessInput = document.getElementById('quickAccessInput');
-            const quickAccessBtn = document.getElementById('quickAccessBtn');
-
-            if (searchInput && searchClearBtn) {
-                // Show/hide clear button
-                searchInput.addEventListener('input', function() {
-                    if (this.value.length > 0) {
-                        searchClearBtn.style.display = 'block';
-                    } else {
-                        searchClearBtn.style.display = 'none';
-                    }
-                });
-
-                // Clear search
-                searchClearBtn.addEventListener('click', function() {
-                    searchInput.value = '';
-                    searchClearBtn.style.display = 'none';
-                    searchInput.focus();
-                    // Trigger search with empty value
-                    if (window.app) {
-                        window.app.loadCommands('', window.app.currentType || 'all');
-                    }
-                });
-
-                // Enter key search
-                searchInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.blur();
-                    }
-                });
+        class GoatMartApp {
+            constructor() {
+                this.currentType = 'all';
+                this.currentSearch = '';
+                this.init();
             }
 
-            // Quick Access Button functionality
-            if (quickAccessInput && quickAccessBtn) {
-                quickAccessBtn.addEventListener('click', function() {
-                    const commandId = quickAccessInput.value;
-                    if (commandId) {
-                        window.location.href = `view.html?id=${commandId}`;
-                    }
-                });
-
-                quickAccessInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        quickAccessBtn.click();
-                    }
-                });
+            init() {
+                this.setupEventListeners();
+                this.loadStats();
+                this.loadCommands();
+                this.setupMaterialEffects();
+                this.setupAccessibility();
             }
-        });
 
-        function initMaterialDesign() {
-            // Add ripple effect to buttons
-            document.querySelectorAll('.btn, .chip').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    let ripple = document.createElement('span');
-                    let rect = this.getBoundingClientRect();
-                    let size = Math.max(rect.width, rect.height);
-                    let x = e.clientX - rect.left - size / 2;
-                    let y = e.clientY - rect.top - size / 2;
+            setupEventListeners() {
+                // Search functionality
+                const searchInput = document.getElementById('searchInput');
+                const searchClearBtn = document.getElementById('searchClearBtn');
+                const quickAccessInput = document.getElementById('quickAccessInput');
+                const quickAccessBtn = document.getElementById('quickAccessBtn');
 
-                    ripple.style.cssText = `
-                        position: absolute;
-                        border-radius: 50%;
-                        background: rgba(255, 255, 255, 0.3);
-                        transform: scale(0);
-                        animation: ripple 0.6s linear;
-                        left: ${x}px;
-                        top: ${y}px;
-                        width: ${size}px;
-                        height: ${size}px;
-                        pointer-events: none;
-                    `;
+                if (searchInput) {
+                    searchInput.addEventListener('input', this.debounce((e) => {
+                        this.currentSearch = e.target.value;
+                        this.loadCommands(this.currentSearch, this.currentType);
+                        this.toggleClearButton();
+                    }, 300));
 
-                    this.appendChild(ripple);
-
-                    setTimeout(() => {
-                        ripple.remove();
-                    }, 600);
-                });
-            });
-
-            // Add focus management for accessibility
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Tab') {
-                    document.body.classList.add('keyboard-navigation');
+                    searchInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            searchInput.blur();
+                        }
+                    });
                 }
-            });
 
-            document.addEventListener('mousedown', function() {
-                document.body.classList.remove('keyboard-navigation');
-            });
-        }
+                if (searchClearBtn) {
+                    searchClearBtn.addEventListener('click', () => {
+                        searchInput.value = '';
+                        this.currentSearch = '';
+                        this.loadCommands('', this.currentType);
+                        this.toggleClearButton();
+                        searchInput.focus();
+                    });
+                }
 
-        function setupEventListeners() {
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', debounce(handleSearch, 300));
-
-            // Filter chips
-            const chips = document.querySelectorAll('.chip');
-            chips.forEach(chip => {
-                chip.addEventListener('click', () => {
-                    chips.forEach(c => c.classList.remove('active'));
-                    chip.classList.add('active');
-                    handleFilter(chip.dataset.type);
+                // Filter chips
+                const chips = document.querySelectorAll('.chip');
+                chips.forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        chips.forEach(c => c.classList.remove('active'));
+                        chip.classList.add('active');
+                        this.currentType = chip.dataset.type;
+                        this.loadCommands(this.currentSearch, this.currentType);
+                    });
                 });
-            });
-        }
 
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/stats');
-                const stats = await response.json();
+                // Quick access
+                if (quickAccessBtn) {
+                    quickAccessBtn.addEventListener('click', () => {
+                        const commandId = quickAccessInput.value;
+                        if (commandId) {
+                            window.location.href = `view.html?id=${commandId}`;
+                        }
+                    });
+                }
 
-                // Animate counter updates
-                animateCounter('totalCommands', stats.totalCommands || 0);
-                animateCounter('totalLikes', stats.totalLikes || 0);
-                animateCounter('activeUsers', stats.dailyActiveUsers || 0);
-                animateCounter('totalShares', stats.totalShares || 0);
-
-                // Update hero stats
-                animateCounter('heroCommands', stats.totalCommands || 0);
-                animateCounter('heroLikes', stats.totalLikes || 0);
-                animateCounter('heroUsers', stats.dailyActiveUsers || 0);
-            } catch (error) {
-                console.error('Error loading stats:', error);
+                if (quickAccessInput) {
+                    quickAccessInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            quickAccessBtn.click();
+                        }
+                    });
+                }
             }
-        }
 
-        async function loadCommands(search = '', type = 'all') {
-            const container = document.getElementById('commandsContainer');
-            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Loading amazing commands...</div></div>';
+            setupMaterialEffects() {
+                // Add ripple effects to buttons and chips
+                document.querySelectorAll('.btn, .chip, .command-card').forEach(element => {
+                    element.addEventListener('click', this.createRipple);
+                });
 
-            try {
-                const params = new URLSearchParams();
-                if (search) params.append('search', search);
-                if (type !== 'all') params.append('category', type);
-                params.append('limit', '12');
+                // Card hover animations
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }
+                    });
+                }, {
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px'
+                });
 
-                const response = await fetch(`/api/items?${params}`);
-                const data = await response.json();
+                document.querySelectorAll('.command-card, .stat-card').forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    observer.observe(card);
+                });
+            }
 
-                if (data.items && data.items.length > 0) {
-                    container.innerHTML = data.items.map(createCommandCard).join('');
+            setupAccessibility() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Tab') {
+                        document.body.classList.add('keyboard-navigation');
+                    }
+                });
+
+                document.addEventListener('mousedown', () => {
+                    document.body.classList.remove('keyboard-navigation');
+                });
+            }
+
+            createRipple(e) {
+                const button = e.currentTarget;
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                const ripple = document.createElement('span');
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                    z-index: 1;
+                `;
+
+                button.style.position = 'relative';
+                button.style.overflow = 'hidden';
+                button.appendChild(ripple);
+
+                setTimeout(() => {
+                    if (ripple.parentNode) {
+                        ripple.parentNode.removeChild(ripple);
+                    }
+                }, 600);
+            }
+
+            toggleClearButton() {
+                const searchInput = document.getElementById('searchInput');
+                const searchClearBtn = document.getElementById('searchClearBtn');
+                
+                if (searchInput.value.length > 0) {
+                    searchClearBtn.style.display = 'block';
                 } else {
+                    searchClearBtn.style.display = 'none';
+                }
+            }
+
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/stats');
+                    const stats = await response.json();
+
+                    this.animateCounter('totalCommands', stats.totalCommands || 0);
+                    this.animateCounter('totalLikes', stats.totalLikes || 0);
+                    this.animateCounter('activeUsers', stats.dailyActiveUsers || 0);
+                    this.animateCounter('totalShares', stats.totalShares || 0);
+
+                    // Update hero stats
+                    this.animateCounter('heroCommands', stats.totalCommands || 0);
+                    this.animateCounter('heroLikes', stats.totalLikes || 0);
+                    this.animateCounter('heroUsers', stats.dailyActiveUsers || 0);
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+
+            async loadCommands(search = '', type = 'all') {
+                const container = document.getElementById('commandsContainer');
+                container.innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Loading amazing commands...</div>
+                    </div>
+                `;
+
+                try {
+                    const params = new URLSearchParams();
+                    if (search) params.append('search', search);
+                    if (type !== 'all') params.append('category', type);
+                    params.append('limit', '12');
+
+                    const response = await fetch(`/api/items?${params}`);
+                    const data = await response.json();
+
+                    if (data.items && data.items.length > 0) {
+                        container.innerHTML = data.items.map(item => this.createCommandCard(item)).join('');
+                        
+                        // Re-observe new cards for animation
+                        setTimeout(() => {
+                            this.setupMaterialEffects();
+                        }, 100);
+                    } else {
+                        container.innerHTML = `
+                            <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface);">
+                                <i class="material-icons" style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;">search_off</i>
+                                <h3 style="margin-bottom: 8px; font-weight: 500; opacity: 0.7;">No commands found</h3>
+                                <p style="opacity: 0.5;">Try adjusting your search terms or filters</p>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error loading commands:', error);
                     container.innerHTML = `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
-                            <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
-                            <h3 style="margin-bottom: 8px; font-weight: 400;">No commands found</h3>
-                            <p>Try adjusting your search terms or filters</p>
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
+                            <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
+                            <h3 style="margin-bottom: 8px; font-weight: 500;">Error loading commands</h3>
+                            <p>Please try again later</p>
                         </div>
                     `;
                 }
-            } catch (error) {
-                console.error('Error loading commands:', error);
-                container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
-                        <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
-                        <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
-                        <p>Please try again later</p>
+            }
+
+            createCommandCard(command) {
+                const truncateText = (text, maxLength = 120) => {
+                    return text && text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+                };
+
+                return `
+                    <div class="command-card">
+                        <div class="command-header">
+                            <div class="command-title">${this.escapeHtml(command.itemName)}</div>
+                            <div class="command-author">
+                                <i class="material-icons" style="font-size: 16px;">person</i>
+                                ${this.escapeHtml(command.authorName)}
+                            </div>
+                        </div>
+                        <div class="command-body">
+                            <div class="command-description">
+                                ${this.escapeHtml(truncateText(command.description))}
+                            </div>
+                            <div class="command-tags">
+                                <span class="tag">
+                                    <i class="material-icons" style="font-size: 12px; margin-right: 2px;">label</i>
+                                    ${command.type}
+                                </span>
+                                ${command.tags ? command.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('') : ''}
+                            </div>
+                            <div class="command-actions">
+                                <a href="view.html?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
+                                    <i class="material-icons">visibility</i>
+                                    View
+                                </a>
+                                <button class="btn btn-outlined" onclick="app.likeCommand(${command.itemID})">
+                                    <i class="material-icons">favorite</i>
+                                    ${command.likes || 0}
+                                </button>
+                                <div class="command-stats">
+                                    <span>
+                                        <i class="material-icons">visibility</i>
+                                        ${command.views || 0}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
-        }
 
-        function createCommandCard(command) {
-            const truncateDescription = (text, maxLength = 120) => {
-                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-            };
-
-            return `
-                <div class="command-card">
-                    <div class="command-header">
-                        <div class="command-title">${escapeHtml(command.itemName)}</div>
-                        <div class="command-author">by ${escapeHtml(command.authorName)}</div>
-                    </div>
-                    <div class="command-body">
-                        <div class="command-description">
-                            ${escapeHtml(truncateDescription(command.description))}
-                        </div>
-                        <div class="command-tags">
-                            <span class="tag">${command.type}</span>
-                            ${command.tags ? command.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('') : ''}
-                        </div>
-                        <div class="command-actions">
-                            <a href="view.html?id=${command.itemID}" class="btn btn-contained" style="flex: 1;">
-                                <i class="material-icons" style="font-size: 18px;">visibility</i>
-                                View
-                            </a>
-                            <button class="btn btn-outlined" onclick="likeCommand(${command.itemID})">
-                                <i class="material-icons" style="font-size: 18px;">favorite</i>
-                                ${command.likes || 0}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function handleSearch(event) {
-            const searchTerm = event.target.value;
-            const activeFilter = document.querySelector('.chip.active').dataset.type;
-            loadCommands(searchTerm, activeFilter);
-        }
-
-        function handleFilter(type) {
-            const searchTerm = document.getElementById('searchInput').value;
-            loadCommands(searchTerm, type);
-        }
-
-        async function likeCommand(itemID) {
-            try {
-                const response = await fetch(`/api/items/${itemID}/like`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const result = await response.json();
-                if (result.success) {
-                    // Reload commands to show updated like count
-                    const searchTerm = document.getElementById('searchInput').value;
-                    const activeFilter = document.querySelector('.chip.active').dataset.type;
-                    loadCommands(searchTerm, activeFilter);
-
-                    // Show success snackbar
-                    showSnackbar('Command liked! ❤️');
-                }
-            } catch (error) {
-                console.error('Error liking command:', error);
-                showSnackbar('Error liking command', 'error');
-            }
-        }
-
-        function showSnackbar(message, type = 'success') {
-            const snackbar = document.createElement('div');
-            snackbar.style.cssText = `
-                position: fixed;
-                bottom: 80px;
-                left: 16px;
-                right: 16px;
-                background: ${type === 'error' ? '#ef4444' : '#10b981'};
-                color: white;
-                padding: 16px;
-                border-radius: var(--radius-small);
-                font-weight: 500;
-                z-index: 1001;
-                transform: translateY(100px);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: var(--elevation-3);
-                max-width: 400px;
-                margin: 0 auto;
-            `;
-            snackbar.textContent = message;
-            document.body.appendChild(snackbar);
-
-            setTimeout(() => snackbar.style.transform = 'translateY(0)', 100);
-            setTimeout(() => {
-                snackbar.style.transform = 'translateY(100px)';
-                setTimeout(() => document.body.removeChild(snackbar), 300);
-            }, 3000);
-        }
-
-        function animateCounter(elementId, target) {
-            const element = document.getElementById(elementId);
-            const start = 0;
-            const duration = 1000;
-            const startTime = performance.now();
-
-            function updateCounter(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const current = Math.floor(progress * target);
-                element.textContent = current;
-
-                if (progress < 1) {
-                    requestAnimationFrame(updateCounter);
+            async likeCommand(itemID) {
+                try {
+                    const response = await fetch(`/api/items/${itemID}/like`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        this.loadCommands(this.currentSearch, this.currentType);
+                        this.showSnackbar('Command liked! ❤️');
+                    }
+                } catch (error) {
+                    console.error('Error liking command:', error);
+                    this.showSnackbar('Error liking command', 'error');
                 }
             }
 
-            requestAnimationFrame(updateCounter);
-        }
+            showSnackbar(message, type = 'success') {
+                // Use AndroidUI snackbar if available
+                if (window.AndroidUI) {
+                    AndroidUI.showSnackbar(message);
+                    return;
+                }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text || '';
-            return div.innerHTML;
-        }
+                // Fallback snackbar
+                const snackbar = document.createElement('div');
+                snackbar.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    left: 16px;
+                    right: 16px;
+                    max-width: 400px;
+                    margin: 0 auto;
+                    background: ${type === 'error' ? '#ef4444' : '#323232'};
+                    color: white;
+                    padding: 16px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    z-index: 1001;
+                    transform: translateY(100px);
+                    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: var(--elevation-3);
+                `;
+                snackbar.textContent = message;
+                document.body.appendChild(snackbar);
 
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
+                setTimeout(() => snackbar.style.transform = 'translateY(0)', 100);
+                setTimeout(() => {
+                    snackbar.style.transform = 'translateY(100px)';
+                    setTimeout(() => document.body.removeChild(snackbar), 300);
+                }, 3000);
+            }
+
+            animateCounter(elementId, target) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+
+                const duration = 1500;
+                const start = 0;
+                const startTime = performance.now();
+
+                const updateCounter = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const current = Math.floor(progress * target);
+                    element.textContent = current.toLocaleString();
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCounter);
+                    }
                 };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
+
+                requestAnimationFrame(updateCounter);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text || '';
+                return div.innerHTML;
+            }
+
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
         }
 
         // Add ripple animation keyframes
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple {
-                0% {
-                    transform: scale(0);
-                    opacity: 0.6;
+        if (!document.getElementById('ripple-animation')) {
+            const style = document.createElement('style');
+            style.id = 'ripple-animation';
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
                 }
-                100% {
-                    transform: scale(4);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Initialize the app
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new GoatMartApp();
+            console.log('GoatMart app initialized successfully');
+        });
     </script>
 </body>
 </html>

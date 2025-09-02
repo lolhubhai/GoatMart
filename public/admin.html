@@ -4,68 +4,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - GoatMart</title>
+    <title>Admin Dashboard - GoatMart</title>
+    <meta name="theme-color" content="#6366f1">
+    
+    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <style>
-        .admin-container {
-            max-width: 800px;
-            margin: 80px auto;
-            padding: 24px;
+        :root {
+            --primary: #6366f1;
+            --primary-variant: #4f46e5;
+            --secondary: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --on-primary: #ffffff;
+            --on-surface: #1f2937;
+            --on-background: #374151;
+            --outline: #d1d5db;
+            --outline-variant: #e5e7eb;
+            --elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --elevation-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            --elevation-3: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+            --radius-small: 8px;
+            --radius-medium: 12px;
+            --radius-large: 16px;
         }
-        
-        .admin-card {
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--background);
+            color: var(--on-background);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top App Bar */
+        .top-app-bar {
             background: var(--surface);
-            border-radius: var(--radius-large);
-            padding: 32px;
             box-shadow: var(--elevation-2);
-            margin-bottom: 24px;
-        }
-        
-        .admin-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 64px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 32px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--outline-variant);
+            padding: 0 16px;
         }
-        
-        .admin-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--error), #dc2626);
+
+        .app-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .app-bar-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--on-primary);
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+
+        .app-subtitle {
+            font-size: 12px;
+            color: var(--on-surface);
+            opacity: 0.7;
+        }
+
+        .app-bar-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 64px;
+            padding: 24px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 24px;
+            box-shadow: var(--elevation-1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--outline-variant);
+        }
+
+        .card:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--on-surface);
+            opacity: 0.7;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius-medium);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--elevation-1);
+            transition: all 0.3s ease;
+            border: 1px solid var(--outline-variant);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--elevation-3);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
             color: white;
             font-size: 24px;
         }
-        
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--on-surface);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--on-surface);
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            border-radius: var(--radius-medium);
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            min-height: 40px;
+            padding: 0 16px;
+            text-decoration: none;
+        }
+
+        .btn-contained {
+            background: var(--primary);
+            color: var(--on-primary);
+            box-shadow: var(--elevation-1);
+        }
+
+        .btn-contained:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-1px);
+        }
+
+        .btn-outlined {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outlined:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        .btn-text {
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-text:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        /* Maintenance Section */
+        .maintenance-section {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 24px;
+            box-shadow: var(--elevation-1);
+            margin-bottom: 24px;
+            border: 1px solid var(--outline-variant);
+        }
+
         .maintenance-toggle {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px;
+            padding: 16px;
             background: var(--background);
             border-radius: var(--radius-medium);
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
-        
+
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 52px;
+            height: 32px;
         }
-        
+
         .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-        
+
         .slider {
             position: absolute;
             cursor: pointer;
@@ -75,43 +309,44 @@
             bottom: 0;
             background-color: #ccc;
             transition: .4s;
-            border-radius: 34px;
+            border-radius: 32px;
         }
-        
+
         .slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
+            height: 24px;
+            width: 24px;
             left: 4px;
             bottom: 4px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
         }
-        
+
         input:checked + .slider {
             background-color: var(--error);
         }
-        
+
         input:checked + .slider:before {
-            transform: translateX(26px);
+            transform: translateX(20px);
         }
-        
+
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
-        
+
         .form-label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--on-surface);
+            font-size: 14px;
         }
-        
+
         .form-input, .form-textarea {
             width: 100%;
-            padding: 16px;
+            padding: 12px 16px;
             border: 1px solid var(--outline);
             border-radius: var(--radius-small);
             font-size: 16px;
@@ -120,67 +355,200 @@
             color: var(--on-surface);
             transition: border-color 0.2s;
         }
-        
+
         .form-input:focus, .form-textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
         }
-        
+
         .form-textarea {
             resize: vertical;
-            min-height: 120px;
+            min-height: 80px;
         }
-        
+
+        /* Data Tables */
+        .data-table {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            overflow: hidden;
+            box-shadow: var(--elevation-1);
+            border: 1px solid var(--outline-variant);
+        }
+
+        .table-header {
+            padding: 16px 24px;
+            background: var(--background);
+            border-bottom: 1px solid var(--outline-variant);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+
+        .table-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table-row {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--outline-variant);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+        }
+
+        .table-row:hover {
+            background: var(--background);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Status Indicators */
         .status-indicator {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
             font-weight: 500;
         }
-        
+
         .status-online {
             background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
+            color: var(--secondary);
         }
-        
+
         .status-maintenance {
             background: rgba(239, 68, 68, 0.1);
             color: var(--error);
         }
-        
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
-        
-        .maintenance-preview {
-            background: var(--background);
+
+        .action-card {
+            background: var(--surface);
             border-radius: var(--radius-medium);
             padding: 20px;
-            margin-top: 16px;
+            text-align: center;
+            box-shadow: var(--elevation-1);
+            transition: all 0.3s ease;
+            cursor: pointer;
             border: 1px solid var(--outline-variant);
+            text-decoration: none;
+            color: inherit;
         }
-        
-        .preview-title {
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--elevation-3);
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: white;
+            font-size: 20px;
+        }
+
+        .action-title {
             font-size: 14px;
             font-weight: 500;
             color: var(--on-surface);
-            margin-bottom: 12px;
         }
-        
-        .preview-content {
-            font-size: 16px;
-            color: var(--on-surface);
-            line-height: 1.5;
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 16px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .app-bar-title .app-subtitle {
+                display: none;
+            }
+
+            .card {
+                padding: 16px;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Snackbar */
+        .snackbar {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: #323232;
+            color: white;
+            padding: 14px 16px;
+            border-radius: var(--radius-small);
+            font-size: 14px;
+            box-shadow: var(--elevation-3);
+            transform: translateY(100px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+
+        .snackbar.show {
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
+    <!-- Top App Bar -->
     <header class="top-app-bar">
         <div class="app-bar-content">
             <div class="app-bar-title">
@@ -188,115 +556,238 @@
                     <i class="material-icons">admin_panel_settings</i>
                 </div>
                 <div>
-                    <div class="app-title">Admin Panel</div>
-                    <div class="app-subtitle">Maintenance Management</div>
+                    <div class="app-title">Admin Dashboard</div>
+                    <div class="app-subtitle">GoatMart Control Center</div>
                 </div>
             </div>
             <div class="app-bar-actions">
-                <button onclick="logout()" class="btn btn-outlined" style="margin-right: 12px;">
-                    <i class="material-icons" style="font-size: 18px;">logout</i>
+                <button onclick="logout()" class="btn btn-outlined">
+                    <i class="material-icons">logout</i>
                     Logout
                 </button>
-                <a href="index.html" class="btn btn-outlined">
-                    <i class="material-icons" style="font-size: 18px;">home</i>
-                    Back to Home
+                <a href="index.html" class="btn btn-contained">
+                    <i class="material-icons">home</i>
+                    Home
                 </a>
             </div>
         </div>
     </header>
 
-    <div class="admin-container">
-        <div class="admin-card">
-            <div class="admin-header">
-                <div class="admin-icon">
-                    <i class="material-icons">settings</i>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-variant));">
+                    <i class="material-icons">code</i>
                 </div>
-                <div>
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 500;">Maintenance Mode</h1>
-                    <p style="margin: 4px 0 0; color: var(--on-surface); opacity: 0.7;">
-                        Control website availability and display custom messages
-                    </p>
-                </div>
+                <div class="stat-number" id="totalCommands">-</div>
+                <div class="stat-label">Total Commands</div>
             </div>
-
-            <div class="maintenance-toggle">
-                <div>
-                    <div style="font-weight: 500; margin-bottom: 4px;">Website Status</div>
-                    <div id="statusIndicator" class="status-indicator status-online">
-                        <i class="material-icons" style="font-size: 16px;">check_circle</i>
-                        Online
-                    </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="material-icons">favorite</i>
                 </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="maintenanceToggle">
-                    <span class="slider"></span>
-                </label>
+                <div class="stat-number" id="totalLikes">-</div>
+                <div class="stat-label">Total Likes</div>
             </div>
-
-            <form id="maintenanceForm">
-                <div class="form-group">
-                    <label class="form-label" for="maintenanceTitle">
-                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">title</i>
-                        Maintenance Title
-                    </label>
-                    <input 
-                        type="text" 
-                        id="maintenanceTitle" 
-                        class="form-input"
-                        placeholder="Website Under Maintenance"
-                        value="🚧 Website Under Maintenance"
-                    >
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--secondary), #059669);">
+                    <i class="material-icons">people</i>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="maintenanceMessage">
-                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">message</i>
-                        Maintenance Message
-                    </label>
-                    <textarea 
-                        id="maintenanceMessage" 
-                        class="form-textarea"
-                        placeholder="Enter your maintenance message here..."
-                    >We're currently performing scheduled maintenance to improve your experience. We'll be back shortly! Thank you for your patience.</textarea>
+                <div class="stat-number" id="activeUsers">-</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="material-icons">trending_up</i>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="estimatedTime">
-                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">schedule</i>
-                        Estimated Time (Optional)
-                    </label>
-                    <input 
-                        type="text" 
-                        id="estimatedTime" 
-                        class="form-input"
-                        placeholder="e.g., 2 hours, 30 minutes, etc."
-                    >
-                </div>
-
-                <div class="maintenance-preview">
-                    <div class="preview-title">
-                        <i class="material-icons" style="vertical-align: middle; margin-right: 8px; font-size: 16px;">preview</i>
-                        Preview
-                    </div>
-                    <div id="previewContent" class="preview-content">
-                        <strong>🚧 Website Under Maintenance</strong><br><br>
-                        We're currently performing scheduled maintenance to improve your experience. We'll be back shortly! Thank you for your patience.
-                    </div>
-                </div>
-
-                <div class="btn-group">
-                    <button type="submit" class="btn btn-contained">
-                        <i class="material-icons" style="font-size: 18px;">save</i>
-                        Save Settings
-                    </button>
-                    <button type="button" id="previewBtn" class="btn btn-outlined">
-                        <i class="material-icons" style="font-size: 18px;">visibility</i>
-                        Preview Page
-                    </button>
-                </div>
-            </form>
+                <div class="stat-number" id="totalRequests">-</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
         </div>
-    </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="upload.html" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-variant));">
+                    <i class="material-icons">add</i>
+                </div>
+                <div class="action-title">Add Command</div>
+            </a>
+            <a href="delete.html" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="material-icons">delete</i>
+                </div>
+                <div class="action-title">Delete Command</div>
+            </a>
+            <a href="view.html" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, var(--secondary), #059669);">
+                    <i class="material-icons">visibility</i>
+                </div>
+                <div class="action-title">View Commands</div>
+            </a>
+            <button onclick="refreshData()" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="material-icons">refresh</i>
+                </div>
+                <div class="action-title">Refresh Data</div>
+            </button>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Maintenance Mode Control -->
+            <div class="maintenance-section">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                        <i class="material-icons">build</i>
+                    </div>
+                    <div>
+                        <div class="card-title">Maintenance Mode</div>
+                        <div class="card-subtitle">Control website availability</div>
+                    </div>
+                </div>
+
+                <div class="maintenance-toggle">
+                    <div>
+                        <div style="font-weight: 500; margin-bottom: 4px;">Website Status</div>
+                        <div id="statusIndicator" class="status-indicator status-online">
+                            <i class="material-icons" style="font-size: 16px;">check_circle</i>
+                            Online
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="maintenanceToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <form id="maintenanceForm">
+                    <div class="form-group">
+                        <label class="form-label" for="maintenanceTitle">
+                            Maintenance Title
+                        </label>
+                        <input 
+                            type="text" 
+                            id="maintenanceTitle" 
+                            class="form-input"
+                            placeholder="Website Under Maintenance"
+                            value="🚧 Website Under Maintenance"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="maintenanceMessage">
+                            Maintenance Message
+                        </label>
+                        <textarea 
+                            id="maintenanceMessage" 
+                            class="form-textarea"
+                            placeholder="Enter maintenance message..."
+                        >We're currently performing scheduled maintenance to improve your experience. We'll be back shortly! Thank you for your patience.</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="estimatedTime">
+                            Estimated Time (Optional)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="estimatedTime" 
+                            class="form-input"
+                            placeholder="e.g., 2 hours, 30 minutes"
+                        >
+                    </div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button type="submit" class="btn btn-contained" style="flex: 1;">
+                            <i class="material-icons">save</i>
+                            Save Settings
+                        </button>
+                        <button type="button" id="previewBtn" class="btn btn-outlined">
+                            <i class="material-icons">visibility</i>
+                            Preview
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Recent Commands -->
+            <div class="data-table">
+                <div class="table-header">
+                    <div class="table-title">Recent Commands</div>
+                    <button onclick="loadRecentCommands()" class="btn btn-text">
+                        <i class="material-icons">refresh</i>
+                        Refresh
+                    </button>
+                </div>
+                <div class="table-content" id="recentCommandsTable">
+                    <div class="table-row">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500;">Loading commands...</div>
+                            <div style="font-size: 12px; color: var(--on-surface); opacity: 0.7;">Please wait</div>
+                        </div>
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--secondary), #059669);">
+                        <i class="material-icons">computer</i>
+                    </div>
+                    <div>
+                        <div class="card-title">System Status</div>
+                        <div class="card-subtitle">Server health & performance</div>
+                    </div>
+                </div>
+                <div id="systemInfo">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Database Status:</span>
+                        <span id="dbStatus" style="color: var(--secondary); font-weight: 500;">Connected</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Server Uptime:</span>
+                        <span id="serverUptime">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Memory Usage:</span>
+                        <span id="memoryUsage">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Response Time:</span>
+                        <span id="responseTime">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Commands -->
+            <div class="data-table">
+                <div class="table-header">
+                    <div class="table-title">Popular Commands</div>
+                    <button onclick="loadPopularCommands()" class="btn btn-text">
+                        <i class="material-icons">trending_up</i>
+                        View All
+                    </button>
+                </div>
+                <div class="table-content" id="popularCommandsTable">
+                    <div class="table-row">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500;">Loading popular commands...</div>
+                            <div style="font-size: 12px; color: var(--on-surface); opacity: 0.7;">Please wait</div>
+                        </div>
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Snackbar -->
+    <div id="snackbar" class="snackbar"></div>
 
     <script>
         let currentSettings = {
@@ -306,14 +797,41 @@
             estimatedTime: ""
         };
 
-        // Load current settings
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadSettings();
+            loadStats();
+            loadRecentCommands();
+            loadPopularCommands();
+            setupEventListeners();
+        });
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin-login';
+                return false;
+            }
+            return true;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('maintenanceToggle').addEventListener('change', updateStatusIndicator);
+            document.getElementById('maintenanceForm').addEventListener('submit', saveSettings);
+            document.getElementById('previewBtn').addEventListener('click', () => {
+                window.open('/maintenance-preview', '_blank');
+            });
+        }
+
+        // Load maintenance settings
         async function loadSettings() {
             try {
                 const token = localStorage.getItem('admin_token');
                 const response = await fetch('/api/maintenance', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
                     currentSettings = await response.json();
@@ -332,15 +850,14 @@
             document.getElementById('maintenanceTitle').value = currentSettings.title;
             document.getElementById('maintenanceMessage').value = currentSettings.message;
             document.getElementById('estimatedTime').value = currentSettings.estimatedTime || '';
-            
             updateStatusIndicator();
-            updatePreview();
         }
 
         // Update status indicator
         function updateStatusIndicator() {
             const indicator = document.getElementById('statusIndicator');
-            if (currentSettings.enabled) {
+            const toggle = document.getElementById('maintenanceToggle');
+            if (toggle.checked) {
                 indicator.className = 'status-indicator status-maintenance';
                 indicator.innerHTML = '<i class="material-icons" style="font-size: 16px;">warning</i>Maintenance Mode';
             } else {
@@ -349,22 +866,9 @@
             }
         }
 
-        // Update preview
-        function updatePreview() {
-            const title = document.getElementById('maintenanceTitle').value;
-            const message = document.getElementById('maintenanceMessage').value;
-            const time = document.getElementById('estimatedTime').value;
-            
-            let preview = `<strong>${title}</strong><br><br>${message}`;
-            if (time) {
-                preview += `<br><br><em>Estimated time: ${time}</em>`;
-            }
-            
-            document.getElementById('previewContent').innerHTML = preview;
-        }
-
-        // Save settings
-        async function saveSettings() {
+        // Save maintenance settings
+        async function saveSettings(e) {
+            e.preventDefault();
             const settings = {
                 enabled: document.getElementById('maintenanceToggle').checked,
                 title: document.getElementById('maintenanceTitle').value,
@@ -386,74 +890,111 @@
                 if (response.ok) {
                     currentSettings = settings;
                     updateStatusIndicator();
-                    showNotification('Settings saved successfully!', 'success');
+                    showSnackbar('Settings saved successfully!', 'success');
                 } else if (response.status === 401) {
                     logout();
                 } else {
-                    showNotification('Error saving settings', 'error');
+                    showSnackbar('Error saving settings', 'error');
                 }
             } catch (error) {
                 console.error('Error saving settings:', error);
-                showNotification('Error saving settings', 'error');
+                showSnackbar('Error saving settings', 'error');
             }
         }
 
-        // Show notification
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 16px;
-                background: ${type === 'error' ? '#ef4444' : '#10b981'};
-                color: white;
-                padding: 16px 24px;
-                border-radius: var(--radius-medium);
-                font-weight: 500;
-                z-index: 1001;
-                transform: translateX(300px);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: var(--elevation-3);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            `;
-            notification.innerHTML = `
-                <i class="material-icons" style="font-size: 20px;">${type === 'error' ? 'error' : 'check_circle'}</i>
-                ${message}
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
-            setTimeout(() => {
-                notification.style.transform = 'translateX(300px)';
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 3000);
+        // Load statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                animateCounter('totalCommands', stats.totalCommands || 0);
+                animateCounter('totalLikes', stats.totalLikes || 0);
+                animateCounter('activeUsers', stats.dailyActiveUsers || 0);
+                animateCounter('totalRequests', stats.totalRequests || 0);
+
+                // Update system info
+                if (stats.hosting) {
+                    document.getElementById('serverUptime').textContent = formatUptime(stats.hosting.uptime);
+                    document.getElementById('memoryUsage').textContent = `${stats.hosting.memory.heapUsed}MB`;
+                    document.getElementById('responseTime').textContent = `${stats.hosting.performance.averageResponseTime}ms`;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
         }
 
-        // Event listeners
-        document.getElementById('maintenanceToggle').addEventListener('change', updateStatusIndicator);
-        document.getElementById('maintenanceTitle').addEventListener('input', updatePreview);
-        document.getElementById('maintenanceMessage').addEventListener('input', updatePreview);
-        document.getElementById('estimatedTime').addEventListener('input', updatePreview);
-
-        document.getElementById('maintenanceForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            saveSettings();
-        });
-
-        document.getElementById('previewBtn').addEventListener('click', () => {
-            window.open('/maintenance-preview', '_blank');
-        });
-
-        // Check authentication on page load
-        function checkAuth() {
-            const token = localStorage.getItem('admin_token');
-            if (!token) {
-                window.location.href = '/admin-login';
-                return false;
+        // Load recent commands
+        async function loadRecentCommands() {
+            try {
+                const response = await fetch('/api/items?limit=5&sort=newest');
+                const data = await response.json();
+                const container = document.getElementById('recentCommandsTable');
+                
+                if (data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.map(item => `
+                        <div class="table-row">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500;">${escapeHtml(item.itemName)}</div>
+                                <div style="font-size: 12px; color: var(--on-surface); opacity: 0.7;">
+                                    by ${escapeHtml(item.authorName)} • ${item.type}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="font-size: 12px; color: var(--on-surface); opacity: 0.7;">
+                                    ${item.likes} <i class="material-icons" style="font-size: 12px; vertical-align: middle;">favorite</i>
+                                </span>
+                                <a href="view.html?id=${item.itemID}" class="btn btn-text" style="padding: 4px 8px; min-height: auto;">
+                                    <i class="material-icons" style="font-size: 16px;">visibility</i>
+                                </a>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="table-row"><div>No commands found</div></div>';
+                }
+            } catch (error) {
+                console.error('Error loading recent commands:', error);
+                document.getElementById('recentCommandsTable').innerHTML = '<div class="table-row"><div>Error loading commands</div></div>';
             }
-            return true;
+        }
+
+        // Load popular commands
+        async function loadPopularCommands() {
+            try {
+                const response = await fetch('/api/items?limit=5&sort=popular');
+                const data = await response.json();
+                const container = document.getElementById('popularCommandsTable');
+                
+                if (data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.map(item => `
+                        <div class="table-row">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500;">${escapeHtml(item.itemName)}</div>
+                                <div style="font-size: 12px; color: var(--on-surface); opacity: 0.7;">
+                                    ${item.views} views • ${item.likes} likes
+                                </div>
+                            </div>
+                            <div style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                #${item.itemID}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="table-row"><div>No popular commands found</div></div>';
+                }
+            } catch (error) {
+                console.error('Error loading popular commands:', error);
+                document.getElementById('popularCommandsTable').innerHTML = '<div class="table-row"><div>Error loading commands</div></div>';
+            }
+        }
+
+        // Refresh all data
+        function refreshData() {
+            loadStats();
+            loadRecentCommands();
+            loadPopularCommands();
+            showSnackbar('Data refreshed successfully!', 'success');
         }
 
         // Logout function
@@ -476,9 +1017,49 @@
             }
         }
 
-        // Initialize
-        if (checkAuth()) {
-            loadSettings();
+        // Utility functions
+        function animateCounter(elementId, target) {
+            const element = document.getElementById(elementId);
+            const duration = 1000;
+            const start = 0;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(progress * target);
+                element.textContent = current.toLocaleString();
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        }
+
+        function formatUptime(uptime) {
+            if (!uptime) return '-';
+            const days = uptime.days || 0;
+            const hours = uptime.hours || 0;
+            const minutes = uptime.minutes || 0;
+            return `${days}d ${hours}h ${minutes}m`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        function showSnackbar(message, type = 'success') {
+            const snackbar = document.getElementById('snackbar');
+            snackbar.textContent = message;
+            snackbar.classList.add('show');
+            
+            setTimeout(() => {
+                snackbar.classList.remove('show');
+            }, 3000);
         }
     </script>
 </body>
