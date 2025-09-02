@@ -940,17 +940,32 @@
         async function loadSettings() {
             try {
                 const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    logout();
+                    return;
+                }
+                
                 const response = await fetch('/api/maintenance', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                
                 if (response.ok) {
-                    currentSettings = await response.json();
-                    updateUI();
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        currentSettings = await response.json();
+                        updateUI();
+                    } else {
+                        console.error('Expected JSON response but got HTML');
+                        logout();
+                    }
                 } else if (response.status === 401) {
                     logout();
+                } else {
+                    console.error('Error response:', response.status);
                 }
             } catch (error) {
                 console.error('Error loading settings:', error);
+                showSnackbar('Error loading settings', 'error');
             }
         }
 
@@ -1015,7 +1030,20 @@
         // Load statistics
         async function loadStats() {
             try {
-                const response = await fetch('/api/stats');
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/stats', {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Expected JSON response');
+                }
+
                 const stats = await response.json();
 
                 animateCounter('totalCommands', stats.totalCommands || 0);
@@ -1031,13 +1059,27 @@
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
+                showSnackbar('Error loading statistics', 'error');
             }
         }
 
         // Load recent commands
         async function loadRecentCommands() {
             try {
-                const response = await fetch('/api/items?limit=5&sort=newest');
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/items?limit=5&sort=newest', {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Expected JSON response');
+                }
+
                 const data = await response.json();
                 const container = document.getElementById('recentCommandsTable');
 
@@ -1072,7 +1114,20 @@
         // Load popular commands
         async function loadPopularCommands() {
             try {
-                const response = await fetch('/api/items?limit=5&sort=popular');
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/items?limit=5&sort=popular', {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Expected JSON response');
+                }
+
                 const data = await response.json();
                 const container = document.getElementById('popularCommandsTable');
 
@@ -1182,8 +1237,18 @@
             try {
                 const token = localStorage.getItem('admin_token');
                 const response = await fetch('/api/items?limit=1000', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Expected JSON response');
+                }
+
                 const data = await response.json();
 
                 if (data.items) {
@@ -1194,6 +1259,7 @@
                 }
             } catch (error) {
                 console.error('Error loading commands:', error);
+                document.getElementById('allCommandsTable').innerHTML = '<div class="table-row"><div>Error loading commands</div></div>';
                 showSnackbar('Error loading commands', 'error');
             }
         }
@@ -1433,12 +1499,8 @@
             }
         });
 
-        // Initialize the app
-        let app;
-        document.addEventListener('DOMContentLoaded', () => {
-            app = new GoatMartApp();
-            console.log('GoatMart app initialized successfully');
-        });
+        // App is now fully initialized
+        console.log('GoatMart Admin Panel loaded successfully');
     </script>
 </body>
 </html>

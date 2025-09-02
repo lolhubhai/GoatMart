@@ -73,9 +73,9 @@ function verifyAdminToken(req, res, next) {
 // Middleware to check maintenance mode
 function checkMaintenanceMode(req, res, next) {
   // Check if user is admin by token
-  const token = req.headers.authorization?.replace('Bearer ', '') || 
-                req.query.token || 
-                req.body.token;
+  const token = (req.headers && req.headers.authorization ? req.headers.authorization.replace('Bearer ', '') : '') || 
+                (req.query && req.query.token ? req.query.token : '') || 
+                (req.body && req.body.token ? req.body.token : '');
   
   const isAdmin = token && adminSessions.has(token) && adminSessions.get(token).expires > Date.now();
 
@@ -140,7 +140,12 @@ function checkMaintenanceMode(req, res, next) {
       '/delete.html'
     ];
     
-    if (blockedPages.includes(req.path) || req.path.endsWith('.html')) {
+    if (blockedPages.includes(req.path)) {
+      return res.redirect('/maintenance.html');
+    }
+    
+    // Block other HTML files except maintenance.html
+    if (req.path.endsWith('.html') && req.path !== '/maintenance.html') {
       return res.redirect('/maintenance.html');
     }
     
@@ -451,6 +456,11 @@ app.post('/api/maintenance', verifyAdminToken, (req, res) => {
 
 // Maintenance preview endpoint
 app.get('/maintenance-preview', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'maintenance.html'));
+});
+
+// Serve maintenance page directly
+app.get('/maintenance.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'maintenance.html'));
 });
 
