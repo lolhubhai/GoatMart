@@ -679,6 +679,31 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Clean URL routes for common pages (without .html extension)
+app.get('/upload', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'upload.html'));
+});
+
+app.get('/paste', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'paste.html'));
+});
+
+app.get('/delete', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'delete.html'));
+});
+
+app.get('/analytics', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
+});
+
+app.get('/profile', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Admin panel route (protected)
 app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
@@ -687,6 +712,57 @@ app.get('/admin.html', (req, res) => {
 // Admin login page
 app.get('/admin-login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+});
+
+// Clean URL route for /view?id=123 (without .html)
+app.get('/view', async (req, res) => {
+  try {
+    const itemId = req.query.id;
+    
+    if (!itemId) {
+      return res.sendFile(path.join(__dirname, 'public', 'view.html'));
+    }
+
+    const item = await Item.findOne({ itemID: parseInt(itemId) });
+
+    if (!item) {
+      return res.sendFile(path.join(__dirname, 'public', 'view.html'));
+    }
+
+    // Read the view.html file
+    const fs = require('fs');
+    let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
+
+    // Replace meta tags with dynamic content
+    const title = `${item.itemName} - GoatMart`;
+    const description = item.description || 'Amazing bot command shared on GoatMart';
+    const url = `${req.protocol}://${req.get('host')}/view?id=${itemId}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/assets/logo.png`;
+
+    html = html.replace('<meta property="og:title" content="GoatMart - Bot Commands">', 
+                       `<meta property="og:title" content="${escapeHtml(title)}">`);
+    html = html.replace('<meta property="og:description" content="Discover and share amazing bot commands">', 
+                       `<meta property="og:description" content="${escapeHtml(description)}">`);
+    html = html.replace('<meta property="og:url" content="">', 
+                       `<meta property="og:url" content="${url}">`);
+    html = html.replace('<meta property="og:image" content="/assets/logo.png">', 
+                       `<meta property="og:image" content="${imageUrl}">`);
+
+    html = html.replace('<meta name="twitter:title" content="GoatMart - Bot Commands">', 
+                       `<meta name="twitter:title" content="${escapeHtml(title)}">`);
+    html = html.replace('<meta name="twitter:description" content="Discover and share amazing bot commands">', 
+                       `<meta name="twitter:description" content="${escapeHtml(description)}">`);
+    html = html.replace('<meta name="twitter:image" content="/assets/logo.png">', 
+                       `<meta name="twitter:image" content="${imageUrl}">`);
+
+    html = html.replace('<title>View Command - GoatMart</title>', 
+                       `<title>${escapeHtml(title)}</title>`);
+
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving view page:', error);
+    res.sendFile(path.join(__dirname, 'public', 'view.html'));
+  }
 });
 
 app.get('/api/stats', async (req, res) => {

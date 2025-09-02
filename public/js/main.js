@@ -78,10 +78,10 @@ class GoatMartApp {
         if (searchInput) {
             // Clear any existing listeners
             searchInput.removeEventListener('input', this.searchHandler);
-            
+
             // Create search suggestions dropdown
             this.createSearchSuggestions(searchInput);
-            
+
             // Advanced search with debouncing
             this.searchHandler = this.debounce(async (e) => {
                 const query = e.target.value.trim();
@@ -92,20 +92,225 @@ class GoatMartApp {
                     this.hideSearchSuggestions();
                 }
             }, 300);
-            
+
             searchInput.addEventListener('input', this.searchHandler);
             searchInput.addEventListener('focus', () => this.showRecentSearches());
-            
+
             // Voice search support
             this.setupVoiceSearch(searchInput);
         }
-        
-        // Advanced filters
-        this.setupAdvancedFilters();dler);
 
-            // Create bound search handler
-            this.searchHandler = this.debounce((e) => {
-                const searchValue = e.target.value.trim();
+        // Advanced filters
+        this.setupAdvancedFilters();
+    }
+
+    setupAdvancedFilters() {
+        const filterContainer = document.getElementById('filterContainer');
+        if (filterContainer) {
+            filterContainer.addEventListener('click', (e) => {
+                const target = e.target.closest('.filter-button');
+                if (target) {
+                    const filterType = target.dataset.filter;
+                    console.log('Applying filter:', filterType);
+                    this.applyFilter(filterType);
+                }
+            });
+        }
+    }
+
+    applyFilter(type) {
+        this.currentType = type;
+        this.loadCommands(this.currentSearch, this.currentType);
+    }
+
+    async performAdvancedSearch(query) {
+        // Simulate fetching AI suggestions
+        console.log('Performing advanced search for:', query);
+        // In a real app, you'd fetch suggestions from an API
+        const suggestions = [
+            `AI suggestion for ${query} 1`,
+            `AI suggestion for ${query} 2`,
+            `AI suggestion for ${query} 3`
+        ];
+        this.updateSearchSuggestions(suggestions);
+    }
+
+    createSearchSuggestions(input) {
+        const suggestionsContainer = document.createElement('div');
+        suggestionsContainer.id = 'searchSuggestions';
+        suggestionsContainer.style.cssText = `
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--outline);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            z-index: 1001;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        `;
+        input.parentNode.style.position = 'relative';
+        input.parentNode.appendChild(suggestionsContainer);
+    }
+
+    showSearchSuggestions(query) {
+        const suggestionsContainer = document.getElementById('searchSuggestions');
+        if (suggestionsContainer) {
+            suggestionsContainer.style.opacity = '1';
+            suggestionsContainer.style.visibility = 'visible';
+        }
+    }
+
+    hideSearchSuggestions() {
+        const suggestionsContainer = document.getElementById('searchSuggestions');
+        if (suggestionsContainer) {
+            suggestionsContainer.style.opacity = '0';
+            suggestionsContainer.style.visibility = 'hidden';
+        }
+    }
+
+    updateSearchSuggestions(suggestions) {
+        const suggestionsContainer = document.getElementById('searchSuggestions');
+        if (!suggestionsContainer) return;
+
+        suggestionsContainer.innerHTML = '';
+        if (suggestions.length === 0) {
+            suggestionsContainer.innerHTML = '<div class="suggestion-item">No suggestions found.</div>';
+            return;
+        }
+
+        suggestions.forEach(suggestion => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.textContent = suggestion;
+            div.style.cssText = `
+                padding: 12px 16px;
+                cursor: pointer;
+                transition: background 0.2s ease;
+                border-bottom: 1px solid var(--outline);
+                color: var(--on-surface);
+            `;
+            div.addEventListener('mouseenter', () => div.style.background = 'var(--surface-variant)');
+            div.addEventListener('mouseleave', () => div.style.background = 'var(--surface)');
+            div.addEventListener('click', () => {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.value = suggestion;
+                    this.hideSearchSuggestions();
+                    this.currentSearch = suggestion;
+                    this.loadCommands(this.currentSearch, this.currentType);
+                }
+            });
+            suggestionsContainer.appendChild(div);
+        });
+    }
+
+    showRecentSearches() {
+        // Placeholder for showing recent searches
+        console.log('Showing recent searches...');
+        const suggestionsContainer = document.getElementById('searchSuggestions');
+        if (!suggestionsContainer) return;
+
+        const recentSearches = ['react', 'javascript', 'css']; // Example
+        suggestionsContainer.innerHTML = '';
+        recentSearches.forEach(search => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.textContent = search;
+            div.style.cssText = `
+                padding: 12px 16px;
+                cursor: pointer;
+                transition: background 0.2s ease;
+                border-bottom: 1px solid var(--outline);
+                color: var(--on-surface);
+            `;
+            div.addEventListener('mouseenter', () => div.style.background = 'var(--surface-variant)');
+            div.addEventListener('mouseleave', () => div.style.background = 'var(--surface)');
+            div.addEventListener('click', () => {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.value = search;
+                    this.hideSearchSuggestions();
+                    this.currentSearch = search;
+                    this.loadCommands(this.currentSearch, this.currentType);
+                }
+            });
+            suggestionsContainer.appendChild(div);
+        });
+        suggestionsContainer.style.opacity = '1';
+        suggestionsContainer.style.visibility = 'visible';
+    }
+
+    setupVoiceSearch(inputElement) {
+        if ('webkitSpeechRecognition' in window) {
+            const micButton = document.createElement('button');
+            micButton.innerHTML = '<i class="material-icons">mic</i>';
+            micButton.className = 'btn btn-text voice-search-button';
+            micButton.style.cssText = `
+                margin-left: -30px; /* Adjust to overlap search input */
+                z-index: 1;
+                padding: 8px;
+                border-radius: 50%;
+            `;
+            inputElement.parentNode.style.display = 'flex';
+            inputElement.parentNode.style.alignItems = 'center';
+            inputElement.parentNode.appendChild(micButton);
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = true;
+
+            micButton.addEventListener('click', () => {
+                recognition.start();
+                micButton.querySelector('i').textContent = 'record_voice_over';
+                micButton.style.color = 'var(--error)';
+            });
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+                inputElement.value = interimTranscript;
+                this.currentSearch = interimTranscript;
+                this.loadCommands(this.currentSearch, this.currentType);
+            };
+
+            recognition.onend = () => {
+                micButton.querySelector('i').textContent = 'mic';
+                micButton.style.color = 'var(--on-surface-variant)';
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                micButton.querySelector('i').textContent = 'mic';
+                micButton.style.color = 'var(--on-surface-variant)';
+            };
+        } else {
+            console.log('Web Speech API not supported by this browser.');
+        }
+    }
+
+
+    // Corrected search and filter setup
+    setupSearchAndFilters() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            // Remove any existing debounced handler to avoid duplicates
+            if (this.searchHandler) {
+                searchInput.removeEventListener('input', this.searchHandler);
+            }
+
+            // Debounce the search input handler
+            this.searchHandler = this.debounce(() => {
+                const searchValue = searchInput.value.trim();
                 this.currentSearch = searchValue;
                 console.log('Searching for:', searchValue);
                 this.loadCommands(this.currentSearch, this.currentType);
@@ -113,34 +318,41 @@ class GoatMartApp {
 
             searchInput.addEventListener('input', this.searchHandler);
 
-            // Add visual feedback
+            // Add visual feedback for focus
             searchInput.addEventListener('focus', () => {
-                searchInput.parentElement.style.borderColor = 'var(--primary)';
-                searchInput.parentElement.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.2)';
+                const parent = searchInput.parentElement;
+                if (parent) {
+                    parent.style.borderColor = 'var(--primary)';
+                    parent.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.2)';
+                }
             });
 
             searchInput.addEventListener('blur', () => {
-                searchInput.parentElement.style.borderColor = '';
-                searchInput.parentElement.style.boxShadow = '';
+                const parent = searchInput.parentElement;
+                if (parent) {
+                    parent.style.borderColor = ''; // Reset to default
+                    parent.style.boxShadow = '';   // Reset to default
+                }
             });
         }
 
         // Quick access functionality
         const quickAccessInput = document.getElementById('quickAccessInput');
         const quickAccessBtn = document.getElementById('quickAccessBtn');
-        
+
         if (quickAccessInput && quickAccessBtn) {
             const handleQuickAccess = () => {
                 const sequentialId = parseInt(quickAccessInput.value);
                 if (sequentialId && sequentialId > 0) {
-                    window.location.href = `/view/seq/${sequentialId}`;
+                    // Use clean URL format
+                    window.location.href = `/view?id=${sequentialId}`;
                 } else {
                     this.showToast('Please enter a valid command ID', 'error');
                 }
             };
 
             quickAccessBtn.addEventListener('click', handleQuickAccess);
-            
+
             quickAccessInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     handleQuickAccess();
@@ -574,7 +786,7 @@ class GoatMartApp {
                         ${command.tags ? command.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('') : ''}
                     </div>
                     <div class="command-actions">
-                        <a href="/view/${command.shortId || command.itemID}" class="btn btn-contained" style="flex: 1;">
+                        <a href="/view?id=${command.shortId || command.itemID}" class="btn btn-contained" style="flex: 1;">
                             <i class="material-icons" style="font-size: 18px;">visibility</i>
                             View
                         </a>
@@ -738,8 +950,8 @@ class GoatMartApp {
                     <div class="access-item">
                         <label>Sequential ID Access:</label>
                         <div class="access-links">
-                            <code>/view/seq/${sequentialId}</code>
-                            <button class="btn btn-outlined" onclick="window.app.copyToClipboard('${window.location.origin}/view/seq/${sequentialId}')">
+                            <code>/view?id=${sequentialId}</code>
+                            <button class="btn btn-outlined" onclick="window.app.copyToClipboard('${window.location.origin}/view?id=${sequentialId}')">
                                 <i class="material-icons">content_copy</i>
                             </button>
                         </div>
