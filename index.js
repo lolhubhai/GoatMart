@@ -72,35 +72,65 @@ function verifyAdminToken(req, res, next) {
 
 // Middleware to check maintenance mode
 function checkMaintenanceMode(req, res, next) {
+  // Check if user is admin by token
+  const token = req.headers.authorization?.replace('Bearer ', '') || 
+                req.query.token || 
+                req.body.token;
+  
+  const isAdmin = token && adminSessions.has(token) && adminSessions.get(token).expires > Date.now();
+
   // Always allow these paths regardless of maintenance mode
   const allowedPaths = [
-    '/admin.html',
-    '/admin-login.html', 
-    '/admin-login',
     '/maintenance.html',
     '/maintenance-preview'
   ];
-  
-  const allowedPrefixes = [
+
+  // Admin-only paths (allowed during maintenance for admins)
+  const adminPaths = [
+    '/admin.html',
+    '/admin-login.html', 
+    '/admin-login'
+  ];
+
+  // Admin-only prefixes
+  const adminPrefixes = [
     '/api/maintenance',
-    '/api/admin',
+    '/api/admin'
+  ];
+
+  // Static assets (CSS, JS, images) - always allowed
+  const staticPrefixes = [
     '/css/',
     '/js/',
     '/assets/'
   ];
 
-  // Check if path is explicitly allowed
+  // Allow static assets always
+  if (staticPrefixes.some(prefix => req.path.startsWith(prefix))) {
+    return next();
+  }
+
+  // Allow maintenance page always
   if (allowedPaths.includes(req.path)) {
     return next();
   }
 
-  // Check if path starts with allowed prefixes
-  if (allowedPrefixes.some(prefix => req.path.startsWith(prefix))) {
+  // Allow admin paths for admins only
+  if (adminPaths.includes(req.path) || adminPrefixes.some(prefix => req.path.startsWith(prefix))) {
+    if (!isAdmin && req.path !== '/admin-login' && req.path !== '/admin-login.html') {
+      return res.redirect('/admin-login');
+    }
     return next();
   }
 
+  // If maintenance is enabled, block everything else except for admins
   if (maintenanceSettings.enabled) {
-    // Block all HTML pages and redirect to maintenance
+    // Allow admins to access everything during maintenance
+    if (isAdmin) {
+      return next();
+    }
+
+    // Block all pages and redirect to maintenance
     const blockedPages = [
       '/',
       '/index.html',
@@ -240,6 +270,145 @@ app.post('/api/admin/logout', verifyAdminToken, (req, res) => {
   }
   
   res.json({ success: true, message: 'Logged out successfully' });
+});
+
+// Admin delete command endpoint
+app.delete('/api/admin/commands/:id', verifyAdminToken, async (req, res) => {
+  try {
+    const itemID = parseInt(req.params.id);
+    const item = await Item.findOne({ itemID });
+
+    if (!item) {
+      return res.status(404).json({ error: 'Command not found' });
+    }
+
+    await Item.deleteOne({ itemID });
+
+    console.log(`Command deleted by admin ${req.admin.username}: ID ${itemID} - ${item.itemName}`);
+
+    res.json({ 
+      success: true, 
+      message: 'Command deleted successfully',
+      deletedItem: {
+        itemID: item.itemID,
+        itemName: item.itemName,
+        authorName: item.authorName
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting command:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Admin restart project endpoint
+app.post('/api/admin/restart', verifyAdminToken, (req, res) => {
+  console.log(`Project restart initiated by admin: ${req.admin.username}`);
+  res.json({ success: true, message: 'Restart initiated' });
+  
+  setTimeout(() => {
+    process.exit(0); // This will restart the process in Replit
+  }, 1000);
+});
+
+// Admin clear database endpoint
+app.delete('/api/admin/clear-database', verifyAdminToken, async (req, res) => {
+  try {
+    const itemsCount = await Item.countDocuments();
+    const statsCount = await Stats.countDocuments();
+    
+    await Item.deleteMany({});
+    await Stats.deleteMany({});
+    
+    // Create fresh stats
+    const newStats = new Stats();
+    await newStats.save();
+    
+    console.log(`Database cleared by admin ${req.admin.username}: ${itemsCount} items, ${statsCount} stats deleted`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Database cleared successfully',
+      deleted: {
+        items: itemsCount,
+        stats: statsCount
+      }
+    });
+  } catch (error) {
+    console.error('Error clearing database:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Admin export data endpoint
+app.get('/api/admin/export', verifyAdminToken, async (req, res) => {
+  try {
+    const items = await Item.find({});
+    const stats = await Stats.findOne({});
+    
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      items: items,
+      stats: stats,
+      totalItems: items.length
+    };
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=goatmart-export-${new Date().toISOString().split('T')[0]}.json`);
+    res.json(exportData);
+    
+    console.log(`Data exported by admin: ${req.admin.username}`);
+  } catch (error) {
+    console.error('Error exporting data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Admin logs endpoint
+app.get('/api/admin/logs', verifyAdminToken, (req, res) => {
+  const logs = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Logs - GoatMart Admin</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #fff; }
+        .log-entry { margin: 5px 0; padding: 5px; border-left: 3px solid #6366f1; }
+        .timestamp { color: #10b981; }
+        .info { border-left-color: #10b981; }
+        .warning { border-left-color: #f59e0b; }
+        .error { border-left-color: #ef4444; }
+    </style>
+</head>
+<body>
+    <h1>GoatMart System Logs</h1>
+    <div class="log-entry info">
+        <span class="timestamp">[${new Date().toISOString()}]</span> 
+        INFO: System accessed by admin ${req.admin.username}
+    </div>
+    <div class="log-entry info">
+        <span class="timestamp">[${new Date().toISOString()}]</span> 
+        INFO: Server running on port ${port}
+    </div>
+    <div class="log-entry info">
+        <span class="timestamp">[${new Date().toISOString()}]</span> 
+        INFO: MongoDB connection status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}
+    </div>
+    <div class="log-entry info">
+        <span class="timestamp">[${new Date().toISOString()}]</span> 
+        INFO: Active admin sessions: ${adminSessions.size}
+    </div>
+    <div class="log-entry info">
+        <span class="timestamp">[${new Date().toISOString()}]</span> 
+        INFO: Maintenance mode: ${maintenanceSettings.enabled ? 'ENABLED' : 'DISABLED'}
+    </div>
+    <script>setInterval(() => window.location.reload(), 30000);</script>
+</body>
+</html>
+  `;
+  
+  res.setHeader('Content-Type', 'text/html');
+  res.send(logs);
 });
 
 // Maintenance API endpoints

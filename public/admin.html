@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - GoatMart</title>
     <meta name="theme-color" content="#6366f1">
-    
+
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary: #6366f1;
@@ -545,6 +544,69 @@
         .snackbar.show {
             transform: translateY(0);
         }
+
+        /* Checkbox Container */
+        .checkbox-container {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 22px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: var(--outline-variant);
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .checkbox-container:hover input ~ .checkmark {
+            background-color: var(--outline);
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: var(--primary);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 7px;
+            top: 3px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
     </style>
 </head>
 <body>
@@ -633,6 +695,30 @@
                 </div>
                 <div class="action-title">Refresh Data</div>
             </button>
+            <button onclick="restartProject()" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #6d28d9, #a855f7);">
+                    <i class="material-icons">restart_alt</i>
+                </div>
+                <div class="action-title">Restart Project</div>
+            </button>
+            <button onclick="clearDatabase()" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="material-icons">storage</i>
+                </div>
+                <div class="action-title">Clear Database</div>
+            </button>
+            <button onclick="exportData()" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="material-icons">download</i>
+                </div>
+                <div class="action-title">Export Data</div>
+            </button>
+            <button onclick="viewSystemLogs()" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="material-icons">description</i>
+                </div>
+                <div class="action-title">View Logs</div>
+            </button>
         </div>
 
         <!-- Dashboard Grid -->
@@ -712,6 +798,29 @@
                     </div>
                 </form>
             </div>
+
+            <!-- All Commands -->
+            <div class="data-table">
+                <div class="table-header">
+                    <div class="table-title">All Commands (<span id="commandsCount">0</span>)</div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <div style="font-size: 12px; color: var(--on-surface); opacity: 0.7;" id="selectedCount">0 selected</div>
+                        <button onclick="selectAllCommands()" class="btn btn-text" style="padding: 4px 8px; min-height: auto;">Select All</button>
+                        <button onclick="clearSelection()" class="btn btn-text" style="padding: 4px 8px; min-height: auto;">Clear Selection</button>
+                        <button onclick="deleteSelectedCommands()" class="btn btn-text" style="padding: 4px 8px; min-height: auto; color: var(--error);">Delete Selected</button>
+                    </div>
+                </div>
+                <div class="table-content" id="allCommandsTable">
+                    <div class="table-row">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500;">Loading commands...</div>
+                            <div style="font-size: 12px; color: var(--on-surface); opacity: 0.7;">Please wait</div>
+                        </div>
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </div>
+
 
             <!-- Recent Commands -->
             <div class="data-table">
@@ -804,6 +913,7 @@
             loadStats();
             loadRecentCommands();
             loadPopularCommands();
+            loadAllCommands(); // Load all commands for management
             setupEventListeners();
         });
 
@@ -907,7 +1017,7 @@
             try {
                 const response = await fetch('/api/stats');
                 const stats = await response.json();
-                
+
                 animateCounter('totalCommands', stats.totalCommands || 0);
                 animateCounter('totalLikes', stats.totalLikes || 0);
                 animateCounter('activeUsers', stats.dailyActiveUsers || 0);
@@ -930,7 +1040,7 @@
                 const response = await fetch('/api/items?limit=5&sort=newest');
                 const data = await response.json();
                 const container = document.getElementById('recentCommandsTable');
-                
+
                 if (data.items && data.items.length > 0) {
                     container.innerHTML = data.items.map(item => `
                         <div class="table-row">
@@ -965,7 +1075,7 @@
                 const response = await fetch('/api/items?limit=5&sort=popular');
                 const data = await response.json();
                 const container = document.getElementById('popularCommandsTable');
-                
+
                 if (data.items && data.items.length > 0) {
                     container.innerHTML = data.items.map(item => `
                         <div class="table-row">
@@ -1056,11 +1166,279 @@
             const snackbar = document.getElementById('snackbar');
             snackbar.textContent = message;
             snackbar.classList.add('show');
-            
+
             setTimeout(() => {
                 snackbar.classList.remove('show');
             }, 3000);
         }
+
+        // Command management variables
+        let allCommands = [];
+        let selectedCommands = new Set();
+        let filteredCommands = [];
+
+        // Load all commands for management
+        async function loadAllCommands() {
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/items?limit=1000', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                if (data.items) {
+                    allCommands = data.items;
+                    filteredCommands = [...allCommands];
+                    renderCommandsTable();
+                    document.getElementById('commandsCount').textContent = allCommands.length;
+                }
+            } catch (error) {
+                console.error('Error loading commands:', error);
+                showSnackbar('Error loading commands', 'error');
+            }
+        }
+
+        // Render commands table
+        function renderCommandsTable() {
+            const container = document.getElementById('allCommandsTable');
+            const commands = filteredCommands;
+
+            if (commands.length === 0) {
+                container.innerHTML = '<div class="table-row"><div>No commands found</div></div>';
+                return;
+            }
+
+            container.innerHTML = commands.map(command => `
+                <div class="table-row" style="padding: 12px 24px;">
+                    <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+                        <label class="checkbox-container">
+                            <input type="checkbox" onchange="toggleCommandSelection(${command.itemID})" ${selectedCommands.has(command.itemID) ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                        </label>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; margin-bottom: 4px;">${escapeHtml(command.itemName)}</div>
+                            <div style="font-size: 12px; color: var(--on-surface); opacity: 0.7;">
+                                ID: ${command.itemID} | ${command.type} | by ${escapeHtml(command.authorName)}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 16px; align-items: center; font-size: 12px; color: var(--on-surface); opacity: 0.7;">
+                            <span><i class="material-icons" style="font-size: 14px;">favorite</i> ${command.likes || 0}</span>
+                            <span><i class="material-icons" style="font-size: 14px;">visibility</i> ${command.views || 0}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="view.html?id=${command.itemID}" class="btn btn-text" style="padding: 4px 8px; min-height: auto;">
+                                <i class="material-icons" style="font-size: 16px;">visibility</i>
+                            </a>
+                            <button onclick="deleteSingleCommand(${command.itemID})" class="btn btn-text" style="padding: 4px 8px; min-height: auto; color: var(--error);">
+                                <i class="material-icons" style="font-size: 16px;">delete</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            updateSelectedCount();
+        }
+
+        // Toggle command selection
+        function toggleCommandSelection(commandId) {
+            if (selectedCommands.has(commandId)) {
+                selectedCommands.delete(commandId);
+            } else {
+                selectedCommands.add(commandId);
+            }
+            updateSelectedCount();
+        }
+
+        // Update selected count display
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = `${selectedCommands.size} selected`;
+        }
+
+        // Select all commands
+        function selectAllCommands() {
+            selectedCommands.clear();
+            filteredCommands.forEach(cmd => selectedCommands.add(cmd.itemID));
+            renderCommandsTable();
+        }
+
+        // Clear selection
+        function clearSelection() {
+            selectedCommands.clear();
+            renderCommandsTable();
+        }
+
+        // Delete selected commands
+        async function deleteSelectedCommands() {
+            if (selectedCommands.size === 0) {
+                showSnackbar('No commands selected', 'error');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete ${selectedCommands.size} selected commands? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('admin_token');
+                let deletedCount = 0;
+
+                for (const commandId of selectedCommands) {
+                    const response = await fetch(`/api/admin/commands/${commandId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (response.ok) {
+                        deletedCount++;
+                    }
+                }
+
+                showSnackbar(`Successfully deleted ${deletedCount} commands`);
+                selectedCommands.clear();
+                loadAllCommands();
+                loadStats();
+            } catch (error) {
+                console.error('Error deleting commands:', error);
+                showSnackbar('Error deleting commands', 'error');
+            }
+        }
+
+        // Delete single command
+        async function deleteSingleCommand(commandId) {
+            if (!confirm('Are you sure you want to delete this command? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch(`/api/admin/commands/${commandId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showSnackbar('Command deleted successfully');
+                    loadAllCommands();
+                    loadStats();
+                } else {
+                    showSnackbar('Error deleting command', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting command:', error);
+                showSnackbar('Error deleting command', 'error');
+            }
+        }
+
+        // Restart project
+        async function restartProject() {
+            if (!confirm('Are you sure you want to restart the project? This will cause temporary downtime.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/admin/restart', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showSnackbar('Project restart initiated...');
+                    setTimeout(() => window.location.reload(), 3000);
+                } else {
+                    showSnackbar('Error restarting project', 'error');
+                }
+            } catch (error) {
+                console.error('Error restarting project:', error);
+                showSnackbar('Error restarting project', 'error');
+            }
+        }
+
+        // Clear database
+        async function clearDatabase() {
+            const confirmation = prompt('This will delete ALL data permanently. Type "DELETE ALL DATA" to confirm:');
+            if (confirmation !== 'DELETE ALL DATA') {
+                showSnackbar('Database clear cancelled', 'error');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/admin/clear-database', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showSnackbar('Database cleared successfully');
+                    loadAllCommands();
+                    loadStats();
+                } else {
+                    showSnackbar('Error clearing database', 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing database:', error);
+                showSnackbar('Error clearing database', 'error');
+            }
+        }
+
+        // Export data
+        async function exportData() {
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('/api/admin/export', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `goatmart-export-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    showSnackbar('Data exported successfully');
+                } else {
+                    showSnackbar('Error exporting data', 'error');
+                }
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showSnackbar('Error exporting data', 'error');
+            }
+        }
+
+        // View system logs
+        function viewSystemLogs() {
+            window.open('/api/admin/logs', '_blank');
+        }
+
+        // Search commands
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('commandSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase();
+                    filteredCommands = allCommands.filter(cmd => 
+                        cmd.itemName.toLowerCase().includes(query) ||
+                        cmd.authorName.toLowerCase().includes(query) ||
+                        cmd.description.toLowerCase().includes(query) ||
+                        cmd.type.toLowerCase().includes(query)
+                    );
+                    renderCommandsTable();
+                });
+            }
+        });
+
+        // Initialize the app
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new GoatMartApp();
+            console.log('GoatMart app initialized successfully');
+        });
     </script>
 </body>
 </html>

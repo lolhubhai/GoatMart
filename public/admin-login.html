@@ -5,142 +5,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - GoatMart</title>
+    <meta name="theme-color" content="#6366f1">
+    
+    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <style>
-        body {
+        :root {
+            --primary: #6366f1;
+            --primary-variant: #4f46e5;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --error: #ef4444;
+            --on-primary: #ffffff;
+            --on-surface: #1f2937;
+            --on-background: #374151;
+            --outline: #d1d5db;
+            --elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --elevation-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            --radius-medium: 12px;
+            --radius-large: 16px;
+        }
+
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 16px;
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 48px 32px;
             width: 100%;
             max-width: 400px;
+            box-shadow: var(--elevation-2);
+            text-align: center;
         }
 
         .login-header {
-            text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
 
         .login-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 24px;
+            margin: 0 auto 16px;
+            color: var(--on-primary);
+            font-size: 40px;
         }
 
         .login-title {
             font-size: 24px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
+            font-weight: 700;
+            color: var(--on-surface);
+            margin-bottom: 8px;
         }
 
         .login-subtitle {
-            color: #666;
-            margin: 8px 0 0;
             font-size: 14px;
+            color: var(--on-surface);
+            opacity: 0.7;
         }
 
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
         }
 
         .form-label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
-            color: #333;
+            color: var(--on-surface);
             font-size: 14px;
         }
 
         .form-input {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
+            padding: 12px 16px;
+            border: 2px solid var(--outline);
+            border-radius: var(--radius-medium);
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: white;
-            box-sizing: border-box;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--on-surface);
+            transition: border-color 0.2s;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--primary);
         }
 
-        .login-button {
+        .btn {
             width: 100%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 16px;
             border: none;
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
+            border-radius: var(--radius-medium);
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
             font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            background: var(--primary);
+            color: var(--on-primary);
+            box-shadow: var(--elevation-1);
         }
 
-        .login-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        .btn:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-1px);
         }
 
-        .login-button:disabled {
+        .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
 
         .error-message {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 12px;
-            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            padding: 12px 16px;
+            border-radius: var(--radius-medium);
             margin-bottom: 20px;
             font-size: 14px;
-            display: none;
+            text-align: center;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .back-link {
+            margin-top: 24px;
             text-align: center;
-            margin-top: 20px;
         }
 
         .back-link a {
-            color: #667eea;
+            color: var(--primary);
             text-decoration: none;
             font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            font-weight: 500;
         }
 
         .back-link a:hover {
@@ -155,70 +193,49 @@
                 <i class="material-icons">admin_panel_settings</i>
             </div>
             <h1 class="login-title">Admin Login</h1>
-            <p class="login-subtitle">Access the maintenance control panel</p>
+            <p class="login-subtitle">Access GoatMart Admin Panel</p>
         </div>
 
-        <div id="errorMessage" class="error-message"></div>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
 
-        <form id="adminLoginForm">
+        <form id="loginForm">
             <div class="form-group">
                 <label class="form-label" for="username">Username</label>
-                <input 
-                    type="text" 
-                    id="username" 
-                    class="form-input"
-                    placeholder="Enter username"
-                    required
-                >
+                <input type="text" id="username" class="form-input" required autocomplete="username">
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="password">Password</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    class="form-input"
-                    placeholder="Enter password"
-                    required
-                >
+                <input type="password" id="password" class="form-input" required autocomplete="current-password">
             </div>
 
-            <button type="submit" class="login-button" id="loginBtn">
-                <i class="material-icons" style="font-size: 18px;">login</i>
-                Login to Admin Panel
+            <button type="submit" class="btn" id="loginBtn">
+                <span id="loginText">Login</span>
+                <div id="loginSpinner" class="loading" style="display: none;"></div>
             </button>
         </form>
 
         <div class="back-link">
-            <a href="/">
-                <i class="material-icons" style="font-size: 16px;">arrow_back</i>
-                Back to Home
-            </a>
+            <a href="/">← Back to Home</a>
         </div>
     </div>
 
     <script>
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        function hideError() {
-            document.getElementById('errorMessage').style.display = 'none';
-        }
-
-        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            hideError();
-
+            
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
             const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loginSpinner = document.getElementById('loginSpinner');
 
-            // Disable button during login
+            // Show loading state
             loginBtn.disabled = true;
-            loginBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">hourglass_empty</i>Logging in...';
+            loginText.style.display = 'none';
+            loginSpinner.style.display = 'inline-block';
+            errorDiv.style.display = 'none';
 
             try {
                 const response = await fetch('/api/admin/login', {
@@ -229,31 +246,37 @@
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
-                if (response.ok && data.success) {
-                    // Store admin session
-                    localStorage.setItem('admin_token', data.token);
-                    localStorage.setItem('admin_user', JSON.stringify(data.user));
-                    
-                    // Redirect to admin panel
+                if (response.ok) {
+                    localStorage.setItem('admin_token', result.token);
+                    localStorage.setItem('admin_user', JSON.stringify(result.user));
                     window.location.href = '/admin.html';
                 } else {
-                    showError(data.error || 'Invalid credentials');
+                    errorDiv.textContent = result.error || 'Login failed';
+                    errorDiv.style.display = 'block';
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                showError('Login failed. Please try again.');
+                errorDiv.textContent = 'Connection error. Please try again.';
+                errorDiv.style.display = 'block';
             } finally {
-                // Re-enable button
+                // Hide loading state
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="material-icons" style="font-size: 18px;">login</i>Login to Admin Panel';
+                loginText.style.display = 'inline';
+                loginSpinner.style.display = 'none';
             }
         });
 
         // Check if already logged in
-        if (localStorage.getItem('admin_token')) {
-            window.location.href = '/admin.html';
+        const token = localStorage.getItem('admin_token');
+        if (token) {
+            fetch('/api/maintenance', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = '/admin.html';
+                }
+            });
         }
     </script>
 </body>
