@@ -28,6 +28,17 @@ function generateId() {
   return crypto.randomBytes(4).toString('hex');
 }
 
+// Generate sequential numeric ID
+async function generateSequentialId() {
+  try {
+    const count = await Item.countDocuments();
+    return count + 1;
+  } catch (error) {
+    console.error('Error generating sequential ID:', error);
+    return Date.now(); // Fallback to timestamp
+  }
+}
+
 function escapeHtml(text) {
   const map = {
     '&': '&amp;',
@@ -146,6 +157,7 @@ const Stats = mongoose.model('Stats', statsSchema);
 const itemSchema = new mongoose.Schema({
   itemID: Number,
   shortId: { type: String, unique: true, default: generateId },
+  sequentialId: { type: Number, unique: true }, // New sequential ID field
   itemName: { type: String, required: true },
   tags: [String],
   difficulty: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Intermediate' },
@@ -479,7 +491,9 @@ app.get('/api/items', async (req, res) => {
     const itemsWithRawLinks = items.map(item => ({
       ...item.toObject(),
       code: undefined,
-      rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`
+      rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`,
+      rawLinkSeq: `${req.protocol}://${req.get('host')}/raw/seq/${item.sequentialId}`,
+      viewLinkSeq: `${req.protocol}://${req.get('host')}/view/seq/${item.sequentialId}`
     }));
 
     const total = await Item.countDocuments(query);
@@ -531,10 +545,12 @@ app.post('/v1/paste', async (req, res) => {
 
     const itemID = await Item.countDocuments() + 1;
     const shortId = generateId();
+    const sequentialId = await generateSequentialId();
 
     const newItem = new Item({
       itemID,
       shortId,
+      sequentialId,
       itemName: itemName || 'Untitled',
       description: description.trim(),
       type,
@@ -600,10 +616,12 @@ app.post('/api/items', async (req, res) => {
 
     const itemID = await Item.countDocuments() + 1;
     const shortId = generateId();
+    const sequentialId = await generateSequentialId();
 
     const newItem = new Item({
       itemID,
       shortId,
+      sequentialId,
       itemName: itemName.trim(),
       description: description.trim(),
       type,
@@ -672,6 +690,57 @@ app.get('/api/item/:itemId', async (req, res) => {
   }
 });
 
+// Add route for viewing by sequential ID
+app.get('/view/seq/:sequentialId', async (req, res) => {
+  try {
+    const sequentialId = parseInt(req.params.sequentialId);
+    
+    if (isNaN(sequentialId) || sequentialId < 1) {
+      return res.sendFile(path.join(__dirname, 'public', 'view.html'));
+    }
+
+    const item = await Item.findOne({ sequentialId });
+    
+    if (!item) {
+      return res.sendFile(path.join(__dirname, 'public', 'view.html'));
+    }
+    
+    // Read the view.html file
+    const fs = require('fs');
+    let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
+    
+    // Replace meta tags with dynamic content
+    const title = `${item.itemName} - GoatMart`;
+    const description = item.description || 'Amazing bot command shared on GoatMart';
+    const url = `${req.protocol}://${req.get('host')}/view/seq/${sequentialId}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/assets/logo.png`;
+    
+    html = html.replace('<meta property="og:title" content="GoatMart - Bot Commands">', 
+                       `<meta property="og:title" content="${escapeHtml(title)}">`);
+    html = html.replace('<meta property="og:description" content="Discover and share amazing bot commands">', 
+                       `<meta property="og:description" content="${escapeHtml(description)}">`);
+    html = html.replace('<meta property="og:url" content="">', 
+                       `<meta property="og:url" content="${url}">`);
+    html = html.replace('<meta property="og:image" content="/assets/logo.png">', 
+                       `<meta property="og:image" content="${imageUrl}">`);
+    
+    html = html.replace('<meta name="twitter:title" content="GoatMart - Bot Commands">', 
+                       `<meta name="twitter:title" content="${escapeHtml(title)}">`);
+    html = html.replace('<meta name="twitter:description" content="Discover and share amazing bot commands">', 
+                       `<meta name="twitter:description" content="${escapeHtml(description)}">`);
+    html = html.replace('<meta name="twitter:image" content="/assets/logo.png">', 
+                       `<meta name="twitter:image" content="${imageUrl}">`);
+    
+    html = html.replace('<title>View Command - GoatMart</title>', 
+                       `<title>${escapeHtml(title)}</title>`);
+    
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving view page:', error);
+    res.sendFile(path.join(__dirname, 'public', 'view.html'));
+  }
+});
+
 // Add route for viewing by unique shortId with dynamic meta tags
 app.get('/view/:shortId', async (req, res) => {
   try {
@@ -735,6 +804,45 @@ app.get('/api/command/:shortId', async (req, res) => {
     res.json({
       itemID: item.itemID,
       shortId: item.shortId,
+      sequentialId: item.sequentialId,
+      itemName: item.itemName,
+      description: item.description,
+      type: item.type,
+      authorName: item.authorName,
+      createdAt: item.createdAt,
+      likes: item.likes,
+      views: item.views,
+      rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`,
+      code: item.code
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// New endpoint for getting command by sequential ID (1, 2, 3, etc.)
+app.get('/api/command/seq/:sequentialId', async (req, res) => {
+  try {
+    const sequentialId = parseInt(req.params.sequentialId);
+    
+    if (isNaN(sequentialId) || sequentialId < 1) {
+      return res.status(400).json({ error: 'Invalid sequential ID' });
+    }
+
+    const item = await Item.findOne({ sequentialId });
+
+    if (!item) {
+      return res.status(404).json({ error: 'Command not found' });
+    }
+
+    // Increment views
+    item.views += 1;
+    await item.save();
+
+    res.json({
+      itemID: item.itemID,
+      shortId: item.shortId,
+      sequentialId: item.sequentialId,
       itemName: item.itemName,
       description: item.description,
       type: item.type,
@@ -760,6 +868,23 @@ app.get('/raw/:shortId', async (req, res) => {
   }
 });
 
+// Raw endpoint for sequential ID
+app.get('/raw/seq/:sequentialId', async (req, res) => {
+  try {
+    const sequentialId = parseInt(req.params.sequentialId);
+    
+    if (isNaN(sequentialId) || sequentialId < 1) {
+      return res.status(404).send('Not found');
+    }
+
+    const item = await Item.findOne({ sequentialId });
+    if (!item) return res.status(404).send('Not found');
+    res.type('text/plain').send(item.code);
+  } catch (error) {
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 app.get('/v1/paste/:shortId', async (req, res) => {
   try {
     const item = await Item.findOne({ shortId: req.params.shortId });
@@ -772,6 +897,50 @@ app.get('/v1/paste/:shortId', async (req, res) => {
       author: item.authorName,
       type: item.type,
       createdAt: item.createdAt
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Quick lookup endpoint - supports both shortId and sequential ID
+app.get('/api/lookup/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    let item;
+
+    // Check if it's a numeric sequential ID
+    if (/^\d+$/.test(id)) {
+      const sequentialId = parseInt(id);
+      item = await Item.findOne({ sequentialId });
+    } else {
+      // Assume it's a shortId
+      item = await Item.findOne({ shortId: id });
+    }
+
+    if (!item) {
+      return res.status(404).json({ error: 'Command not found' });
+    }
+
+    // Increment views
+    item.views += 1;
+    await item.save();
+
+    res.json({
+      itemID: item.itemID,
+      shortId: item.shortId,
+      sequentialId: item.sequentialId,
+      itemName: item.itemName,
+      description: item.description,
+      type: item.type,
+      authorName: item.authorName,
+      createdAt: item.createdAt,
+      likes: item.likes,
+      views: item.views,
+      rawLink: `${req.protocol}://${req.get('host')}/raw/${item.shortId}`,
+      rawLinkSeq: `${req.protocol}://${req.get('host')}/raw/seq/${item.sequentialId}`,
+      viewLinkSeq: `${req.protocol}://${req.get('host')}/view/seq/${item.sequentialId}`,
+      code: item.code
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });

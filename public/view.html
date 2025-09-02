@@ -473,7 +473,11 @@
         async function loadCommand() {
             let apiUrl;
             
-            if (shortId && shortId !== 'view.html') {
+            // Check if we're on /view/seq/123 path
+            if (window.location.pathname.startsWith('/view/seq/')) {
+                const sequentialId = window.location.pathname.split('/')[3];
+                apiUrl = `/api/command/seq/${sequentialId}`;
+            } else if (shortId && shortId !== 'view.html') {
                 // Loading by shortId from /view/shortId
                 apiUrl = `/api/command/${shortId}`;
             } else if (itemId) {

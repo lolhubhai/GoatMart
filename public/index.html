@@ -1,17 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>GoatMart - A Commands hub Website</title>
-    
+
     <!-- Theme Color for Android -->
     <meta name="theme-color" content="#6366f1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    
+
     <!-- Open Graph Meta Tags for Link Sharing -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="GoatMart">
@@ -19,27 +18,27 @@
     <meta property="og:description" content="Discover, share, and explore amazing bot commands for GoatBot, MiraiBot, and AutoBot. Join the community!">
     <meta property="og:image" content="/assets/logo.png">
     <meta property="og:url" content="/">
-    
+
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@GoatMart">
     <meta name="twitter:title" content="GoatMart - Bot Command Hub">
     <meta name="twitter:description" content="Discover, share, and explore amazing bot commands for GoatBot, MiraiBot, and AutoBot. Join the community!">
     <meta name="twitter:image" content="/assets/logo.png">
-    
+
     <!-- Regular Meta Tags -->
     <meta name="description" content="Discover, share, and explore amazing bot commands for GoatBot, MiraiBot, and AutoBot. Join the community!">
     <meta name="keywords" content="bot commands, goatbot, miraibot, autobot, code sharing, programming">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Material+Icons+Outlined&family=Material+Icons&display=swap" rel="stylesheet">
-    
+
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+
     <style>
         /* Android Material Design Variables */
         :root {
@@ -366,6 +365,56 @@
             font-size: 24px;
         }
 
+        /* Quick Access Search Box */
+        .quick-access-container {
+            margin-top: 24px;
+            background: var(--surface);
+            padding: 20px;
+            border-radius: var(--radius-large);
+            box-shadow: var(--elevation-1);
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .quick-access-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quick-access-input-container .material-icons {
+            color: rgba(0,0,0,0.54);
+            font-size: 24px;
+        }
+
+        .quick-access-input {
+            flex-grow: 1;
+            height: 56px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: var(--radius-small);
+            padding: 0 16px 0 48px;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            background: var(--surface);
+            color: var(--on-surface);
+            transition: all 0.2s ease;
+        }
+
+        .quick-access-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            border-width: 2px;
+            padding-left: 47px;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+        }
+
+        .quick-access-btn {
+            height: 56px;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+
         /* Material Design Chips */
         .chip-container {
             display: flex;
@@ -684,11 +733,11 @@
                 --on-surface: #ffffff;
                 --on-background: #ffffff;
             }
-            
+
             .top-app-bar {
                 background: rgba(18, 18, 18, 0.95);
             }
-            
+
             .search-input {
                 background: var(--surface);
                 color: var(--on-surface);
@@ -735,7 +784,7 @@
             <div class="hero-content">
                 <h1 class="hero-title">Commands Sharing Website</h1>
                 <p class="hero-subtitle">Project credits to Aryan Chauhan</p>
-                
+
                 <div class="hero-stats">
                     <div class="hero-stat">
                         <span class="hero-stat-number" id="heroCommands">-</span>
@@ -763,12 +812,32 @@
                         <i class="material-icons">clear</i>
                     </button>
                 </div>
-                
+
                 <div class="chip-container">
                     <button class="chip active" data-type="all">All Commands</button>
                     <button class="chip" data-type="GoatBot">GoatBot</button>
                     <button class="chip" data-type="MiraiBot">MiraiBot</button>
                     <button class="chip" data-type="AutoBot">AutoBot</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Access Search Box -->
+        <div class="card-container">
+            <div class="quick-access-container">
+                <div class="quick-access-input-container">
+                    <i class="material-icons">tag</i>
+                    <input 
+                        type="number" 
+                        id="quickAccessInput" 
+                        class="quick-access-input" 
+                        placeholder="Enter command ID (1, 2, 3...)"
+                        min="1"
+                    >
+                    <button class="btn btn-contained quick-access-btn" id="quickAccessBtn">
+                        <i class="material-icons">launch</i>
+                        Go
+                    </button>
                 </div>
             </div>
         </div>
@@ -848,11 +917,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             // App is already initialized via main.js
             console.log('GoatMart app initialized successfully');
-            
+
             // Enhanced search functionality
             const searchInput = document.getElementById('searchInput');
             const searchClearBtn = document.getElementById('searchClearBtn');
-            
+            const quickAccessInput = document.getElementById('quickAccessInput');
+            const quickAccessBtn = document.getElementById('quickAccessBtn');
+
             if (searchInput && searchClearBtn) {
                 // Show/hide clear button
                 searchInput.addEventListener('input', function() {
@@ -862,7 +933,7 @@
                         searchClearBtn.style.display = 'none';
                     }
                 });
-                
+
                 // Clear search
                 searchClearBtn.addEventListener('click', function() {
                     searchInput.value = '';
@@ -873,12 +944,29 @@
                         window.app.loadCommands('', window.app.currentType || 'all');
                     }
                 });
-                
+
                 // Enter key search
                 searchInput.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         this.blur();
+                    }
+                });
+            }
+
+            // Quick Access Button functionality
+            if (quickAccessInput && quickAccessBtn) {
+                quickAccessBtn.addEventListener('click', function() {
+                    const commandId = quickAccessInput.value;
+                    if (commandId) {
+                        window.location.href = `view.html?id=${commandId}`;
+                    }
+                });
+
+                quickAccessInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        quickAccessBtn.click();
                     }
                 });
             }
@@ -893,7 +981,7 @@
                     let size = Math.max(rect.width, rect.height);
                     let x = e.clientX - rect.left - size / 2;
                     let y = e.clientY - rect.top - size / 2;
-                    
+
                     ripple.style.cssText = `
                         position: absolute;
                         border-radius: 50%;
@@ -906,9 +994,9 @@
                         height: ${size}px;
                         pointer-events: none;
                     `;
-                    
+
                     this.appendChild(ripple);
-                    
+
                     setTimeout(() => {
                         ripple.remove();
                     }, 600);
@@ -947,13 +1035,13 @@
             try {
                 const response = await fetch('/api/stats');
                 const stats = await response.json();
-                
+
                 // Animate counter updates
                 animateCounter('totalCommands', stats.totalCommands || 0);
                 animateCounter('totalLikes', stats.totalLikes || 0);
                 animateCounter('activeUsers', stats.dailyActiveUsers || 0);
                 animateCounter('totalShares', stats.totalShares || 0);
-                
+
                 // Update hero stats
                 animateCounter('heroCommands', stats.totalCommands || 0);
                 animateCounter('heroLikes', stats.totalLikes || 0);
@@ -1056,7 +1144,7 @@
                     const searchTerm = document.getElementById('searchInput').value;
                     const activeFilter = document.querySelector('.chip.active').dataset.type;
                     loadCommands(searchTerm, activeFilter);
-                    
+
                     // Show success snackbar
                     showSnackbar('Command liked! ❤️');
                 }
@@ -1087,7 +1175,7 @@
             `;
             snackbar.textContent = message;
             document.body.appendChild(snackbar);
-            
+
             setTimeout(() => snackbar.style.transform = 'translateY(0)', 100);
             setTimeout(() => {
                 snackbar.style.transform = 'translateY(100px)';

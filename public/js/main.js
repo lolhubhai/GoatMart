@@ -101,6 +101,29 @@ class GoatMartApp {
             });
         }
 
+        // Quick access functionality
+        const quickAccessInput = document.getElementById('quickAccessInput');
+        const quickAccessBtn = document.getElementById('quickAccessBtn');
+        
+        if (quickAccessInput && quickAccessBtn) {
+            const handleQuickAccess = () => {
+                const sequentialId = parseInt(quickAccessInput.value);
+                if (sequentialId && sequentialId > 0) {
+                    window.location.href = `/view/seq/${sequentialId}`;
+                } else {
+                    this.showToast('Please enter a valid command ID', 'error');
+                }
+            };
+
+            quickAccessBtn.addEventListener('click', handleQuickAccess);
+            
+            quickAccessInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleQuickAccess();
+                }
+            });
+        }
+
         // Filter chips
         const chips = document.querySelectorAll('.chip');
         chips.forEach(chip => {
@@ -516,6 +539,7 @@ class GoatMartApp {
                 <div class="command-header">
                     <div class="command-title">${this.escapeHtml(command.itemName)}</div>
                     <div class="command-author">by ${this.escapeHtml(command.authorName)}</div>
+                    <div class="command-id-badge">#${command.sequentialId || command.itemID}</div>
                 </div>
                 <div class="command-body">
                     <div class="command-description">
@@ -533,6 +557,9 @@ class GoatMartApp {
                         <button class="btn btn-outlined" onclick="window.app.likeCommand(${command.itemID})">
                             <i class="material-icons" style="font-size: 18px;">favorite</i>
                             ${command.likes || 0}
+                        </button>
+                        <button class="btn btn-text" onclick="window.app.showQuickAccess(${command.sequentialId || command.itemID}, '${command.shortId}')" title="Quick Access">
+                            <i class="material-icons" style="font-size: 18px;">link</i>
                         </button>
                     </div>
                 </div>
@@ -671,6 +698,180 @@ class GoatMartApp {
         return div.innerHTML;
     }
 
+    showQuickAccess(sequentialId, shortId) {
+        const modal = document.createElement('div');
+        modal.className = 'quick-access-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" onclick="this.parentElement.remove()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Quick Access Links</h3>
+                    <button class="btn btn-text" onclick="this.closest('.quick-access-modal').remove()">
+                        <i class="material-icons">close</i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="access-item">
+                        <label>Sequential ID Access:</label>
+                        <div class="access-links">
+                            <code>/view/seq/${sequentialId}</code>
+                            <button class="btn btn-outlined" onclick="window.app.copyToClipboard('${window.location.origin}/view/seq/${sequentialId}')">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="access-item">
+                        <label>Raw Code (Sequential):</label>
+                        <div class="access-links">
+                            <code>/raw/seq/${sequentialId}</code>
+                            <button class="btn btn-outlined" onclick="window.app.copyToClipboard('${window.location.origin}/raw/seq/${sequentialId}')">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="access-item">
+                        <label>API Endpoint:</label>
+                        <div class="access-links">
+                            <code>/api/command/seq/${sequentialId}</code>
+                            <button class="btn btn-outlined" onclick="window.app.copyToClipboard('${window.location.origin}/api/command/seq/${sequentialId}')">
+                                <i class="material-icons">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add modal styles if not already present
+        if (!document.querySelector('#quick-access-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'quick-access-styles';
+            styles.textContent = `
+                .quick-access-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .modal-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                }
+
+                .modal-content {
+                    background: var(--surface);
+                    border-radius: 12px;
+                    box-shadow: var(--shadow-xl);
+                    max-width: 500px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow: auto;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .modal-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 20px;
+                    border-bottom: 1px solid var(--outline);
+                }
+
+                .modal-header h3 {
+                    margin: 0;
+                    color: var(--on-surface);
+                }
+
+                .modal-body {
+                    padding: 20px;
+                }
+
+                .access-item {
+                    margin-bottom: 20px;
+                }
+
+                .access-item label {
+                    display: block;
+                    font-weight: 500;
+                    color: var(--on-surface);
+                    margin-bottom: 8px;
+                }
+
+                .access-links {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: var(--surface-variant);
+                    padding: 12px;
+                    border-radius: 8px;
+                }
+
+                .access-links code {
+                    flex: 1;
+                    background: none;
+                    color: var(--primary);
+                    font-family: 'Courier New', monospace;
+                    font-size: 14px;
+                }
+
+                .command-id-badge {
+                    background: var(--primary);
+                    color: var(--on-primary);
+                    padding: 4px 8px;
+                    border-radius: 12px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    margin-left: auto;
+                }
+
+                .command-header {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 8px;
+                    margin-bottom: 12px;
+                }
+
+                .command-header .command-title {
+                    flex: 1;
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+    }
+
+    async copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            this.showToast('Link copied to clipboard! 📋', 'success');
+        } catch (error) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                this.showToast('Link copied to clipboard! 📋', 'success');
+            } catch (err) {
+                this.showToast('Failed to copy link', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+
     static copyToClipboard(text) {
         return navigator.clipboard.writeText(text).then(() => {
             return true;
@@ -770,6 +971,58 @@ if (!document.querySelector('#main-app-styles')) {
         font-weight: 400;
         color: var(--on-surface);
         opacity: 0.8;
+      }
+
+      .quick-access-container {
+        margin-top: 16px;
+        padding: 16px;
+        background: var(--surface-variant);
+        border-radius: 12px;
+        border: 1px solid var(--outline);
+      }
+
+      .quick-access-input-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--surface);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--outline);
+      }
+
+      .quick-access-input {
+        flex: 1;
+        border: none;
+        background: none;
+        color: var(--on-surface);
+        font-size: 16px;
+        outline: none;
+      }
+
+      .quick-access-input::placeholder {
+        color: var(--on-surface-variant);
+      }
+
+      .command-id-badge {
+        background: var(--primary);
+        color: var(--on-primary);
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-left: auto;
+      }
+
+      .command-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .command-header .command-title {
+        flex: 1;
       }
     `;
     document.head.appendChild(appStyles);
