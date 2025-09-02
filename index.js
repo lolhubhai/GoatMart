@@ -7,7 +7,6 @@ const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
-// Maintenance mode settings
 let maintenanceSettings = {
   enabled: false,
   title: "🚧 Website Under Maintenance",
@@ -15,28 +14,23 @@ let maintenanceSettings = {
   estimatedTime: ""
 };
 
-// Admin credentials
 const adminCredentials = {
   username: "aryan786",
   password: "Aryan@009"
 };
 
-// Admin sessions (in production, use proper session management)
 const adminSessions = new Map();
 
 function generateId() {
   return crypto.randomBytes(4).toString('hex');
 }
 
-// Generate sequential numeric ID
 async function generateSequentialId() {
   try {
-    // Find the highest existing sequentialId and add 1
     const lastItem = await Item.findOne().sort({ sequentialId: -1 });
     return lastItem ? lastItem.sequentialId + 1 : 1;
   } catch (error) {
     console.error('Error generating sequential ID:', error);
-    // Fallback to timestamp if there's an issue finding the last item or counting
     return Date.now(); 
   }
 }
@@ -52,7 +46,6 @@ function escapeHtml(text) {
   return text ? text.replace(/[&<>"']/g, (m) => map[m]) : '';
 }
 
-// Middleware to verify admin token
 function verifyAdminToken(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '') || 
                 req.query.token || 
@@ -72,57 +65,47 @@ function verifyAdminToken(req, res, next) {
   next();
 }
 
-// Middleware to check maintenance mode
 function checkMaintenanceMode(req, res, next) {
-  // Check if user is admin by token
   const token = (req.headers && req.headers.authorization ? req.headers.authorization.replace('Bearer ', '') : '') || 
                 (req.query && req.query.token ? req.query.token : '') || 
                 (req.body && req.body.token ? req.body.token : '');
 
   const isAdmin = token && adminSessions.has(token) && adminSessions.get(token).expires > Date.now();
 
-  // Always allow these paths regardless of maintenance mode
   const allowedPaths = [
     '/maintenance.html',
     '/maintenance-preview'
   ];
 
-  // Admin-only paths (allowed during maintenance for admins)
   const adminPaths = [
     '/admin.html',
     '/admin-login.html', 
     '/admin-login'
   ];
 
-  // Admin-only prefixes
   const adminPrefixes = [
     '/api/maintenance',
     '/api/admin'
   ];
 
-  // Always allow admin login endpoint regardless of maintenance mode
   if (req.path === '/api/admin/login') {
     return next();
   }
 
-  // Static assets (CSS, JS, images) - always allowed
   const staticPrefixes = [
     '/css/',
     '/js/',
     '/assets/'
   ];
 
-  // Allow static assets always
   if (staticPrefixes.some(prefix => req.path.startsWith(prefix))) {
     return next();
   }
 
-  // Allow maintenance page always
   if (allowedPaths.includes(req.path)) {
     return next();
   }
 
-  // Allow admin paths for admins only
   if (adminPaths.includes(req.path) || adminPrefixes.some(prefix => req.path.startsWith(prefix))) {
     if (!isAdmin && req.path !== '/admin-login' && req.path !== '/admin-login.html') {
       return res.redirect('/admin-login');
@@ -130,14 +113,11 @@ function checkMaintenanceMode(req, res, next) {
     return next();
   }
 
-  // If maintenance is enabled, block everything else except for admins
   if (maintenanceSettings.enabled) {
-    // Allow admins to access everything during maintenance
     if (isAdmin) {
       return next();
     }
 
-    // Block all pages and redirect to maintenance
     const blockedPages = [
       '/',
       '/index.html',
@@ -151,12 +131,10 @@ function checkMaintenanceMode(req, res, next) {
       return res.redirect('/maintenance.html');
     }
 
-    // Block other HTML files except maintenance.html
     if (req.path.endsWith('.html') && req.path !== '/maintenance.html') {
       return res.redirect('/maintenance.html');
     }
 
-    // For API endpoints, return JSON response
     if (req.path.startsWith('/api/')) {
       return res.status(503).json({
         error: 'Service temporarily unavailable',
@@ -167,14 +145,14 @@ function checkMaintenanceMode(req, res, next) {
       });
     }
 
-    // For all other requests during maintenance, redirect to maintenance page
     return res.redirect('/maintenance.html');
   }
 
   next();
 }
 
-mongoose.connect('mongodb+srv://aryanchauhan786:Aryanchauhan009@cluster0.fadh4dj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('
+mongodb+srv://motame7485_db_user:1Pvz4F8QcKkKJc8p@goatmart.gn83d9x.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
@@ -197,9 +175,9 @@ const statsSchema = new mongoose.Schema({
 const Stats = mongoose.model('Stats', statsSchema);
 
 const itemSchema = new mongoose.Schema({
-  itemID: { type: Number, unique: true }, // Changed to unique
+  itemID: { type: Number, unique: true },
   shortId: { type: String, unique: true, default: generateId },
-  sequentialId: { type: Number, unique: true }, // New sequential ID field
+  sequentialId: { type: Number, unique: true },
   itemName: { type: String, required: true },
   tags: [String],
   difficulty: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Intermediate' },
@@ -228,7 +206,6 @@ const Item = mongoose.model('Item', itemSchema);
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Admin login endpoint - MUST be before maintenance check middleware
 app.post('/api/admin/login', (req, res) => {
   try {
     const { username, password } = req.body;
@@ -238,9 +215,8 @@ app.post('/api/admin/login', (req, res) => {
     }
 
     if (username === adminCredentials.username && password === adminCredentials.password) {
-      // Generate session token
       const token = crypto.randomBytes(32).toString('hex');
-      const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+      const expires = Date.now() + (24 * 60 * 60 * 1000); 
 
       adminSessions.set(token, {
         user: { username: adminCredentials.username },
@@ -262,10 +238,8 @@ app.post('/api/admin/login', (req, res) => {
   }
 });
 
-// Apply maintenance mode check to all routes EXCEPT admin login
 app.use(checkMaintenanceMode);
 
-// Request tracking middleware
 app.use(async (req, res, next) => {
   try {
     let stats = await Stats.findOne();
@@ -280,7 +254,6 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Admin logout endpoint
 app.post('/api/admin/logout', verifyAdminToken, (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '') || 
                 req.query.token || 
@@ -293,7 +266,6 @@ app.post('/api/admin/logout', verifyAdminToken, (req, res) => {
   res.json({ success: true, message: 'Logged out successfully' });
 });
 
-// Admin delete command endpoint
 app.delete('/api/admin/commands/:id', verifyAdminToken, async (req, res) => {
   try {
     const itemID = parseInt(req.params.id);
@@ -322,7 +294,6 @@ app.delete('/api/admin/commands/:id', verifyAdminToken, async (req, res) => {
   }
 });
 
-// Admin restart project endpoint
 app.post('/api/admin/restart', verifyAdminToken, (req, res) => {
   console.log(`Project restart initiated by admin: ${req.admin.username}`);
   res.json({ success: true, message: 'Restart initiated' });
@@ -332,7 +303,6 @@ app.post('/api/admin/restart', verifyAdminToken, (req, res) => {
   }, 1000);
 });
 
-// Admin clear database endpoint
 app.delete('/api/admin/clear-database', verifyAdminToken, async (req, res) => {
   try {
     const itemsCount = await Item.countDocuments();
@@ -341,7 +311,6 @@ app.delete('/api/admin/clear-database', verifyAdminToken, async (req, res) => {
     await Item.deleteMany({});
     await Stats.deleteMany({});
 
-    // Create fresh stats
     const newStats = new Stats();
     await newStats.save();
 
@@ -361,7 +330,6 @@ app.delete('/api/admin/clear-database', verifyAdminToken, async (req, res) => {
   }
 });
 
-// Admin export data endpoint
 app.get('/api/admin/export', verifyAdminToken, async (req, res) => {
   try {
     const items = await Item.find({});
@@ -385,7 +353,6 @@ app.get('/api/admin/export', verifyAdminToken, async (req, res) => {
   }
 });
 
-// Analytics API endpoint
 app.get('/api/analytics', async (req, res) => {
   try {
     const today = new Date();
@@ -429,7 +396,6 @@ app.get('/api/analytics', async (req, res) => {
   }
 });
 
-// Trending keywords API
 app.get('/api/trending-keywords', async (req, res) => {
   try {
     const keywords = await Item.aggregate([
@@ -447,7 +413,6 @@ app.get('/api/trending-keywords', async (req, res) => {
   }
 });
 
-// Advanced search API
 app.get('/api/search/semantic', async (req, res) => {
   try {
     const { q, keywords } = req.query;
@@ -466,7 +431,6 @@ app.get('/api/search/semantic', async (req, res) => {
       .sort({ views: -1, likes: -1 })
       .limit(20);
 
-    // Generate AI-powered suggestions
     const suggestions = await generateSearchSuggestions(q, keywordArray);
 
     res.json({
@@ -484,12 +448,10 @@ app.get('/api/search/semantic', async (req, res) => {
   }
 });
 
-// Code validation API
 app.post('/api/validate-code', async (req, res) => {
   try {
     const { code, language } = req.body;
 
-    // Basic validation based on language
     const validation = validateCodeSyntax(code, language);
 
     res.json({
@@ -503,7 +465,6 @@ app.post('/api/validate-code', async (req, res) => {
   }
 });
 
-// User profile API
 app.get('/api/user/:username', async (req, res) => {
   try {
     const username = req.params.username;
@@ -532,7 +493,6 @@ app.get('/api/user/:username', async (req, res) => {
   }
 });
 
-// Helper functions
 async function generateSearchSuggestions(query, keywords) {
   const suggestions = [
     `${query} tutorial`,
@@ -552,7 +512,6 @@ function validateCodeSyntax(code, language) {
   };
 
   if (language === 'javascript') {
-    // Basic JavaScript validation
     if (!code.includes('module.exports') && !code.includes('export')) {
       result.warnings.push('Consider adding module.exports for better compatibility');
     }
@@ -580,7 +539,6 @@ function generateUserAchievements(items, likes, views) {
   return achievements;
 }
 
-// Admin logs endpoint
 app.get('/api/admin/logs', verifyAdminToken, (req, res) => {
   const logs = `
 <!DOCTYPE html>
@@ -627,7 +585,6 @@ app.get('/api/admin/logs', verifyAdminToken, (req, res) => {
   res.send(logs);
 });
 
-// Maintenance API endpoints
 app.get('/api/maintenance', (req, res) => {
   res.json(maintenanceSettings);
 });
@@ -635,7 +592,6 @@ app.get('/api/maintenance', (req, res) => {
 app.post('/api/maintenance', verifyAdminToken, (req, res) => {
   const { enabled, title, message, estimatedTime } = req.body;
 
-  // Basic validation
   if (typeof enabled !== 'boolean') {
     return res.status(400).json({ error: 'Invalid enabled value' });
   }
@@ -648,7 +604,6 @@ app.post('/api/maintenance', verifyAdminToken, (req, res) => {
     return res.status(400).json({ error: 'Invalid message' });
   }
 
-  // Update settings
   maintenanceSettings = {
     enabled,
     title: title || maintenanceSettings.title,
@@ -665,12 +620,10 @@ app.post('/api/maintenance', verifyAdminToken, (req, res) => {
   });
 });
 
-// Maintenance preview endpoint
 app.get('/maintenance-preview', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'maintenance.html'));
 });
 
-// Serve maintenance page directly
 app.get('/maintenance.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'maintenance.html'));
 });
@@ -679,7 +632,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Clean URL routes for common pages (without .html extension)
 app.get('/upload', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'upload.html'));
 });
@@ -704,21 +656,18 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Admin panel route (protected)
 app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Admin login page
 app.get('/admin-login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
 
-// Clean URL route for /view?id=123 (without .html)
 app.get('/view', async (req, res) => {
   try {
     const itemId = req.query.id;
-    
+
     if (!itemId) {
       return res.sendFile(path.join(__dirname, 'public', 'view.html'));
     }
@@ -729,11 +678,9 @@ app.get('/view', async (req, res) => {
       return res.sendFile(path.join(__dirname, 'public', 'view.html'));
     }
 
-    // Read the view.html file
     const fs = require('fs');
     let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
 
-    // Replace meta tags with dynamic content
     const title = `${item.itemName} - GoatMart`;
     const description = item.description || 'Amazing bot command shared on GoatMart';
     const url = `${req.protocol}://${req.get('host')}/view?id=${itemId}`;
@@ -796,7 +743,6 @@ app.get('/api/stats', async (req, res) => {
 
     const topViewed = await Item.find().sort({views: -1}).limit(5);
 
-    // Get hosting information
     const startTime = process.uptime();
     const uptime = {
       seconds: Math.floor(startTime % 60),
@@ -905,18 +851,16 @@ app.get('/api/trending', async (req, res) => {
   }
 });
 
-// Get items with pagination
 app.get('/api/items', async (req, res) => {
   try {
     const {
       search = '',
       category = 'all',
-      limit = 1000, // Default to high limit to show all commands
+      limit = 1000, 
       page = 1,
       sort = 'newest'
     } = req.query;
 
-    // Build query
     let query = {};
 
     if (search) {
@@ -931,7 +875,6 @@ app.get('/api/items', async (req, res) => {
       query.type = category;
     }
 
-    // Build sort
     let sortObj = {};
     switch (sort) {
       case 'popular':
@@ -991,7 +934,6 @@ app.post('/api/items/:id/like', async (req, res) => {
   }
 });
 
-// Paste-like endpoints
 app.post('/v1/paste', async (req, res) => {
   try {
     const { 
@@ -1009,7 +951,6 @@ app.post('/v1/paste', async (req, res) => {
       return res.status(400).json({ error: 'Description is required' });
     }
 
-    // Generate unique itemID by finding the highest existing ID
     const lastItem = await Item.findOne().sort({ itemID: -1 });
     const itemID = lastItem ? lastItem.itemID + 1 : 1;
     const shortId = generateId();
@@ -1028,17 +969,15 @@ app.post('/v1/paste', async (req, res) => {
       difficulty
     });
 
-    // Save with retry logic for duplicate key errors
     let saveAttempts = 0;
     const maxAttempts = 3;
 
     while (saveAttempts < maxAttempts) {
       try {
         await newItem.save();
-        break; // Success, exit loop
+        break; 
       } catch (error) {
         if (error.code === 11000 && saveAttempts < maxAttempts - 1) {
-          // Duplicate key error, regenerate IDs and try again
           saveAttempts++;
           const lastItem = await Item.findOne().sort({ itemID: -1 });
           newItem.itemID = lastItem ? lastItem.itemID + 1 : 1;
@@ -1046,12 +985,11 @@ app.post('/v1/paste', async (req, res) => {
           newItem.shortId = generateId();
           console.log(`Retrying save with new IDs (attempt ${saveAttempts})`);
         } else {
-          throw error; // Re-throw if not a duplicate key error or max attempts reached
+          throw error; 
         }
       }
     }
 
-    // Update stats
     try {
       let stats = await Stats.findOne();
       if (!stats) {
@@ -1076,7 +1014,6 @@ app.post('/v1/paste', async (req, res) => {
   }
 });
 
-// Add new command with manual description
 app.post('/api/items', async (req, res) => {
   try {
     const { 
@@ -1089,7 +1026,6 @@ app.post('/api/items', async (req, res) => {
       difficulty = 'Intermediate'
     } = req.body;
 
-    // Validate required fields
     if (!itemName || !itemName.trim()) {
       return res.status(400).json({ error: 'Command name is required' });
     }
@@ -1103,7 +1039,6 @@ app.post('/api/items', async (req, res) => {
       return res.status(400).json({ error: 'Type is required' });
     }
 
-    // Generate unique itemID by finding the highest existing ID
     const lastItem = await Item.findOne().sort({ itemID: -1 });
     const itemID = lastItem ? lastItem.itemID + 1 : 1;
     const shortId = generateId();
@@ -1122,17 +1057,15 @@ app.post('/api/items', async (req, res) => {
       difficulty
     });
 
-    // Save with retry logic for duplicate key errors
     let saveAttempts = 0;
     const maxAttempts = 3;
 
     while (saveAttempts < maxAttempts) {
       try {
         await newItem.save();
-        break; // Success, exit loop
+        break; 
       } catch (error) {
         if (error.code === 11000 && saveAttempts < maxAttempts - 1) {
-          // Duplicate key error, regenerate IDs and try again
           saveAttempts++;
           const lastItem = await Item.findOne().sort({ itemID: -1 });
           newItem.itemID = lastItem ? lastItem.itemID + 1 : 1;
@@ -1145,7 +1078,6 @@ app.post('/api/items', async (req, res) => {
       }
     }
 
-    // Update stats
     try {
       let stats = await Stats.findOne();
       if (!stats) {
@@ -1180,7 +1112,6 @@ app.get('/api/item/:itemId', async (req, res) => {
       return res.status(404).json({ error: 'Item not found' });
     }
 
-    // Increment views
     item.views += 1;
     await item.save();
 
@@ -1202,7 +1133,6 @@ app.get('/api/item/:itemId', async (req, res) => {
   }
 });
 
-// Add route for viewing by sequential ID
 app.get('/view/seq/:sequentialId', async (req, res) => {
   try {
     const sequentialId = parseInt(req.params.sequentialId);
@@ -1217,11 +1147,9 @@ app.get('/view/seq/:sequentialId', async (req, res) => {
       return res.sendFile(path.join(__dirname, 'public', 'view.html'));
     }
 
-    // Read the view.html file
     const fs = require('fs');
     let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
 
-    // Replace meta tags with dynamic content
     const title = `${item.itemName} - GoatMart`;
     const description = item.description || 'Amazing bot command shared on GoatMart';
     const url = `${req.protocol}://${req.get('host')}/view/seq/${sequentialId}`;
@@ -1253,7 +1181,6 @@ app.get('/view/seq/:sequentialId', async (req, res) => {
   }
 });
 
-// Add route for viewing by unique shortId with dynamic meta tags
 app.get('/view/:shortId', async (req, res) => {
   try {
     const shortId = req.params.shortId;
@@ -1263,11 +1190,9 @@ app.get('/view/:shortId', async (req, res) => {
       return res.sendFile(path.join(__dirname, 'public', 'view.html'));
     }
 
-    // Read the view.html file
     const fs = require('fs');
     let html = fs.readFileSync(path.join(__dirname, 'public', 'view.html'), 'utf8');
 
-    // Replace meta tags with dynamic content
     const title = `${item.itemName} - GoatMart`;
     const description = item.description || 'Amazing bot command shared on GoatMart';
     const url = `${req.protocol}://${req.get('host')}/view/${shortId}`;
@@ -1299,7 +1224,6 @@ app.get('/view/:shortId', async (req, res) => {
   }
 });
 
-// API endpoint for getting command by shortId
 app.get('/api/command/:shortId', async (req, res) => {
   try {
     const shortId = req.params.shortId;
@@ -1309,7 +1233,6 @@ app.get('/api/command/:shortId', async (req, res) => {
       return res.status(404).json({ error: 'Command not found' });
     }
 
-    // Increment views
     item.views += 1;
     await item.save();
 
@@ -1332,7 +1255,6 @@ app.get('/api/command/:shortId', async (req, res) => {
   }
 });
 
-// New endpoint for getting command by sequential ID (1, 2, 3, etc.)
 app.get('/api/command/seq/:sequentialId', async (req, res) => {
   try {
     const sequentialId = parseInt(req.params.sequentialId);
@@ -1347,7 +1269,6 @@ app.get('/api/command/seq/:sequentialId', async (req, res) => {
       return res.status(404).json({ error: 'Command not found' });
     }
 
-    // Increment views
     item.views += 1;
     await item.save();
 
@@ -1380,7 +1301,6 @@ app.get('/raw/:shortId', async (req, res) => {
   }
 });
 
-// Raw endpoint for sequential ID
 app.get('/raw/seq/:sequentialId', async (req, res) => {
   try {
     const sequentialId = parseInt(req.params.sequentialId);
@@ -1415,18 +1335,15 @@ app.get('/v1/paste/:shortId', async (req, res) => {
   }
 });
 
-// Quick lookup endpoint - supports both shortId and sequential ID
 app.get('/api/lookup/:id', async (req, res) => {
   try {
     const id = req.params.id;
     let item;
 
-    // Check if it's a numeric sequential ID
     if (/^\d+$/.test(id)) {
       const sequentialId = parseInt(id);
       item = await Item.findOne({ sequentialId });
     } else {
-      // Assume it's a shortId
       item = await Item.findOne({ shortId: id });
     }
 
@@ -1434,7 +1351,6 @@ app.get('/api/lookup/:id', async (req, res) => {
       return res.status(404).json({ error: 'Command not found' });
     }
 
-    // Increment views
     item.views += 1;
     await item.save();
 
@@ -1459,7 +1375,6 @@ app.get('/api/lookup/:id', async (req, res) => {
   }
 });
 
-// Delete command endpoint
 app.delete('/api/items/:id', async (req, res) => {
   try {
     const itemID = parseInt(req.params.id);
@@ -1471,7 +1386,6 @@ app.delete('/api/items/:id', async (req, res) => {
 
     await Item.deleteOne({ itemID });
 
-    // Update stats if needed
     try {
       let stats = await Stats.findOne();
       if (stats) {
