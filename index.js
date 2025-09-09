@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = 3000;
 
 let maintenanceSettings = {
   enabled: false,
@@ -151,7 +151,7 @@ function checkMaintenanceMode(req, res, next) {
   next();
 }
 
-mongoose.connect('mongodb+srv://lajegix672:KaXY8RqzIcJ31Nyo@goatmart.9p854kx.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
+mongoose.connect('mongodb+srv://motame7485_db_user:1Pvz4F8QcKkKJc8p@goatmart.gn83d9x.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
