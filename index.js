@@ -14,15 +14,9 @@ let maintenanceSettings = {
   estimatedTime: ""
 };
 
-// Check for required admin credentials
-if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
-  console.error('ADMIN_USERNAME and ADMIN_PASSWORD environment variables are required');
-  process.exit(1);
-}
-
 const adminCredentials = {
-  username: process.env.ADMIN_USERNAME,
-  password: process.env.ADMIN_PASSWORD
+  username: "itsaryan686",
+  password: "pppp@0000",
 };
 
 const adminSessions = new Map();
@@ -157,13 +151,7 @@ function checkMaintenanceMode(req, res, next) {
   next();
 }
 
-// Check for required environment variables
-if (!process.env.MONGO_URI) {
-  console.error('MONGO_URI environment variable is required');
-  process.exit(1);
-}
-
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect('mongodb+srv://motame7485_db_user:1Pvz4F8QcKkKJc8p@goatmart.gn83d9x.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
@@ -900,19 +888,13 @@ app.get('/api/items', async (req, res) => {
         break;
     }
 
-    // Implement cursor-based pagination for better performance
-    const limitNum = Math.min(parseInt(limit), 100); // Cap at 100 for performance
-    const cursor = req.query.cursor;
-    
-    // When using cursor pagination, force createdAt-desc sort for consistency
-    if (cursor) {
-      query.createdAt = { $lt: new Date(cursor) };
-      sortObj = { createdAt: -1 }; // Force consistent sort for pagination
-    }
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = parseInt(limit);
 
     const items = await Item.find(query)
       .sort(sortObj)
-      .limit(limitNum);
+      .skip(skip)
+      .limit(parseInt(limit));
 
     const itemsWithRawLinks = items.map(item => ({
       ...item.toObject(),
@@ -922,18 +904,14 @@ app.get('/api/items', async (req, res) => {
       viewLinkSeq: `${req.protocol}://${req.get('host')}/view/seq/${item.sequentialId}`
     }));
 
-    // Calculate next cursor and hasMore for cursor-based pagination
-    const nextCursor = items.length === limitNum && items.length > 0 
-      ? items[items.length - 1].createdAt.toISOString() 
-      : null;
-    const hasMore = items.length === limitNum;
-    const total = cursor ? null : await Item.countDocuments(query); // Only count on first page
+    const total = await Item.countDocuments(query);
 
     res.json({
       items: itemsWithRawLinks,
       total,
-      nextCursor,
-      hasMore
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limitNum),
+      hasMore: skip + limitNum < total
     });
   } catch (error) {
     console.error('Error fetching items:', error);
