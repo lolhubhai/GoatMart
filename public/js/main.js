@@ -93,7 +93,7 @@ class GoatMartApp {
 
     applyFilter(type) {
         this.currentType = type;
-        this.loadCommands(true);
+        this.loadCommands(this.currentSearch, type, true);
     }
 
     async performAdvancedSearch(query) {
@@ -666,110 +666,76 @@ class GoatMartApp {
         requestAnimationFrame(animate);
     }
 
-    async loadCommands(search = '', type = 'all') {
-        const container = document.getElementById('commandsContainer');
-
-        // Initialize loading states
-        this.currentSearch = search;
-        this.currentType = type;
+    async loadCommands(search = '', type = 'all', reset = false) {
+        if (this.isLoading) return;
+        
+        if (reset) {
+            this.currentSearch = search?.trim() || '';
+            this.currentType = type || 'all';
+            this.currentCursor = null;
+            this.hasMore = true;
+            this.loadedIds.clear();
+            this.clearCommandsUI();
+            this.setupInfiniteScroll();
+        }
+        
+        if (!this.hasMore) return;
+        
         this.isLoading = true;
-
-        // Enhanced loading state
-        container.innerHTML = `
-            <div class="loading-container">
-                <div class="loading-spinner-modern"></div>
-                <div class="loading-text">Loading all commands...</div>
-                <div class="loading-subtitle">Fetching the latest bot commands for you</div>
-            </div>
-        `;
-
+        
         try {
             const params = new URLSearchParams();
-            if (search && search.trim()) params.append('search', search.trim());
-            if (type !== 'all') params.append('category', type);
-            // Remove limit to load ALL commands
-            // Implement proper infinite loading - start with reasonable batch size
-            params.append('limit', '50'); // Start with 50 commands for better performance
-            params.append('page', '1'); // Always start from page 1
+            if (this.currentSearch) params.append('search', this.currentSearch);
+            if (this.currentType !== 'all') params.append('category', this.currentType);
+            params.append('limit', '50');
+            if (this.currentCursor) params.append('cursor', this.currentCursor);
             
-            // Start fresh loading for new search/filter
-            if (this.currentPage === 1) {
-                this.allCommands = [];
-            }
-
-            const response = await fetch(`/api/items?${params}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-
-            // Update pagination info
-            this.totalPages = data.totalPages || 1;
-            this.hasMore = data.hasMore || false;
-
-            if (data.items && data.items.length > 0) {
-                // Add new items to our collection
-                this.allCommands = this.currentPage === 1 ? data.items : [...this.allCommands, ...data.items];
-                
-                // Render all commands
-                const commandCards = this.allCommands.map(command => this.createCommandCard(command)).join('');
-                container.innerHTML = commandCards;
-
-                // Add load more button if there are more items
-                if (this.hasMore && this.currentPage < this.totalPages) {
-                    container.innerHTML += `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 32px;">
-                            <button id="loadMoreBtn" class="btn btn-contained" style="padding: 16px 32px; font-size: 16px; font-weight: 600;">
-                                <i class="material-icons" style="margin-right: 8px;">expand_more</i>
-                                Load More Commands (${this.allCommands.length} of ${data.total})
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Add click handler for load more button
-                    document.getElementById('loadMoreBtn')?.addEventListener('click', () => {
-                        this.loadMoreCommands();
-                    });
-                }
-
-                // Re-attach event listeners to new cards
-                this.attachCardEventListeners();
-
-                // Show total count
-                this.updateCommandCount(this.allCommands.length, data.total);
-            } else if (this.currentPage === 1) {
+            const res = await fetch(`/api/items?${params}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            const data = await res.json();
+            const items = data.items || [];
+            
+            if (reset && items.length === 0) {
+                const container = document.getElementById('commandsContainer');
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
                         <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
                         <h3 style="margin-bottom: 8px; font-weight: 400;">No commands found</h3>
                         <p>Try adjusting your search terms or filters</p>
                     </div>
+                    <div id="infiniteSentinel" style="grid-column: 1 / -1; height: 1px;"></div>
                 `;
+                this.hasMore = false;
+                return;
             }
-        } catch (error) {
-            console.error('Error loading commands:', error);
-            container.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--error);">
-                    <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">error</i>
-                    <h3 style="margin-bottom: 8px; font-weight: 400;">Error loading commands</h3>
-                    <p>Please try again later</p>
-                    <button class="btn btn-contained" onclick="window.app.loadCommands('${search}', '${type}')" style="margin-top: 16px;">
-                        <i class="material-icons">refresh</i>
-                        Try Again
-                    </button>
-                </div>
-            `;
+            
+            for (const item of items) {
+                const key = item.shortId || item.itemID;
+                if (this.loadedIds.has(key)) continue;
+                this.loadedIds.add(key);
+                this.appendCommandCard(item);
+            }
+            
+            this.currentCursor = data.nextCursor || null;
+            this.hasMore = !!data.hasMore;
+            
+            if (!this.hasMore) {
+                this.showEndOfList();
+            }
+            
+            if (this.updateCommandCount) {
+                this.updateCommandCount(this.loadedIds.size, data.total ?? this.loadedIds.size);
+            }
+            
+        } catch (e) {
+            console.error('Error loading commands:', e);
+            this.showFetchError(e);
+        } finally {
+            this.isLoading = false;
         }
-
-        this.isLoading = false;
     }
 
-    async loadMoreCommands() {
-        if (this.isLoading || !this.hasMore) return;
-        
-        this.currentPage++;
-        await this.loadCommands(this.currentSearch, this.currentType);
-    }
 
     updateCommandCount(showing, total) {
         // Update header with command count
@@ -810,7 +776,7 @@ class GoatMartApp {
         
         this.observer = new IntersectionObserver((entries) => {
             if (entries.some(e => e.isIntersecting) && this.hasMore && !this.isLoading) {
-                this.loadCommands();
+                this.loadCommands(this.currentSearch, this.currentType, false);
             }
         }, { root: null, rootMargin: '600px', threshold: 0 });
         
