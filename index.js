@@ -14,9 +14,15 @@ let maintenanceSettings = {
   estimatedTime: ""
 };
 
+// Check for required admin credentials
+if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+  console.error('ADMIN_USERNAME and ADMIN_PASSWORD environment variables are required');
+  process.exit(1);
+}
+
 const adminCredentials = {
-  username: "aryan786",
-  password: "Aryan@009"
+  username: process.env.ADMIN_USERNAME,
+  password: process.env.ADMIN_PASSWORD
 };
 
 const adminSessions = new Map();
@@ -151,7 +157,13 @@ function checkMaintenanceMode(req, res, next) {
   next();
 }
 
-mongoose.connect('mongodb+srv://motame7485_db_user:1Pvz4F8QcKkKJc8p@goatmart.gn83d9x.mongodb.net/?retryWrites=true&w=majority&appName=GoatMart')
+// Check for required environment variables
+if (!process.env.MONGO_URI) {
+  console.error('MONGO_URI environment variable is required');
+  process.exit(1);
+}
+
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
     console.error('MongoDB connection error:', err);

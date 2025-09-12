@@ -423,6 +423,273 @@
             font-weight: 500;
         }
 
+        /* Enhanced Snackbar Styles */
+        .snackbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .snackbar.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .snackbar-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+        }
+
+        .snackbar-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .snackbar-message {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .snackbar-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .snackbar-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .snackbar-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .snackbar-info {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Enhanced Card Animations */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            box-shadow: var(--elevation-1);
+            border: 1px solid var(--outline-variant);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            box-shadow: var(--elevation-3);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Buttons with Ripple Effect */
+        .btn {
+            position: relative;
+            overflow: hidden;
+            border: none;
+            border-radius: var(--radius-small);
+            padding: 12px 24px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
+            color: var(--on-primary);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-variant));
+            color: var(--on-secondary);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Dashboard Stats */
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius-large);
+            padding: 24px;
+            box-shadow: var(--elevation-1);
+            border: 1px solid var(--outline-variant);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(99, 102, 241, 0.03) 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .stat-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--elevation-2);
+            transform: translateY(-4px);
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
+            color: var(--on-primary);
+            border: none;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: currentColor;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Table Styling */
+        .table-row {
+            transition: all 0.2s ease;
+        }
+
+        .table-row:hover {
+            background: linear-gradient(90deg, var(--background), transparent);
+            transform: translateX(4px);
+        }
+
+        /* Mobile Enhancements */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .fab {
+                bottom: 16px;
+                right: 16px;
+            }
+            
+            .snackbar {
+                left: 16px;
+                right: 16px;
+                transform: translateY(100px);
+            }
+            
+            .snackbar.show {
+                transform: translateY(0);
+            }
+        }
+
         .status-online {
             background: rgba(16, 185, 129, 0.1);
             color: var(--secondary);
@@ -1498,6 +1765,135 @@
                 });
             }
         });
+
+        // Enhanced Delete Functions for Admin Panel
+        async function deleteSingleCommand(commandId) {
+            // Enhanced confirmation dialog
+            if (!confirm(`Are you sure you want to delete command ID ${commandId}? This action cannot be undone.`)) {
+                return;
+            }
+
+            // Show loading state
+            showSnackbar('Deleting command...', 'info');
+            
+            try {
+                const token = localStorage.getItem('admin_token');
+                
+                if (!token) {
+                    showSnackbar('Authentication required. Please log in again.', 'error');
+                    window.location.href = '/admin-login.html';
+                    return;
+                }
+                
+                const response = await fetch(`/api/admin/commands/${commandId}`, {
+                    method: 'DELETE',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showSnackbar(`Command "${result.deletedItem?.itemName || commandId}" deleted successfully!`, 'success');
+                    loadAllCommands();
+                    loadStats();
+                } else if (response.status === 401) {
+                    showSnackbar('Session expired. Please log in again.', 'error');
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/admin-login.html';
+                } else if (response.status === 404) {
+                    showSnackbar('Command not found. It may have already been deleted.', 'warning');
+                    loadAllCommands();
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    showSnackbar(`Failed to delete command: ${errorData.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting command:', error);
+                showSnackbar(`Network error: ${error.message}. Please check your connection.`, 'error');
+            }
+        }
+
+        async function deleteSelectedCommands() {
+            const selectedCommands = document.querySelectorAll('.command-checkbox:checked');
+            
+            if (selectedCommands.length === 0) {
+                showSnackbar('Please select commands to delete', 'warning');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete ${selectedCommands.length} selected command(s)? This action cannot be undone.`)) {
+                return;
+            }
+
+            showSnackbar(`Deleting ${selectedCommands.length} commands...`, 'info');
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const checkbox of selectedCommands) {
+                const commandId = checkbox.dataset.commandId;
+                try {
+                    const token = localStorage.getItem('admin_token');
+                    const response = await fetch(`/api/admin/commands/${commandId}`, {
+                        method: 'DELETE',
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                } catch (error) {
+                    failCount++;
+                }
+            }
+
+            if (successCount > 0) {
+                showSnackbar(`Successfully deleted ${successCount} command(s)${failCount > 0 ? `, ${failCount} failed` : ''}`, successCount === selectedCommands.length ? 'success' : 'warning');
+                loadAllCommands();
+                loadStats();
+            } else {
+                showSnackbar('Failed to delete any commands', 'error');
+            }
+        }
+
+        // Enhanced Snackbar with better styling and types
+        function showSnackbar(message, type = 'info', duration = 4000) {
+            const snackbar = document.createElement('div');
+            snackbar.className = `snackbar snackbar-${type}`;
+            
+            const icon = {
+                'success': '✅',
+                'error': '❌', 
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            snackbar.innerHTML = `
+                <div class="snackbar-content">
+                    <span class="snackbar-icon">${icon}</span>
+                    <span class="snackbar-message">${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(snackbar);
+            
+            setTimeout(() => snackbar.classList.add('show'), 100);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    snackbar.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(snackbar), 300);
+                }, duration);
+            }
+            
+            return snackbar;
+        }
 
         // App is now fully initialized
         console.log('GoatMart Admin Panel loaded successfully');
