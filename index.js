@@ -900,13 +900,19 @@ app.get('/api/items', async (req, res) => {
         break;
     }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const limitNum = parseInt(limit);
+    // Implement cursor-based pagination for better performance
+    const limitNum = Math.min(parseInt(limit), 100); // Cap at 100 for performance
+    const cursor = req.query.cursor;
+    
+    // When using cursor pagination, force createdAt-desc sort for consistency
+    if (cursor) {
+      query.createdAt = { $lt: new Date(cursor) };
+      sortObj = { createdAt: -1 }; // Force consistent sort for pagination
+    }
 
     const items = await Item.find(query)
       .sort(sortObj)
-      .skip(skip)
-      .limit(parseInt(limit));
+      .limit(limitNum);
 
     const itemsWithRawLinks = items.map(item => ({
       ...item.toObject(),
@@ -916,14 +922,18 @@ app.get('/api/items', async (req, res) => {
       viewLinkSeq: `${req.protocol}://${req.get('host')}/view/seq/${item.sequentialId}`
     }));
 
-    const total = await Item.countDocuments(query);
+    // Calculate next cursor and hasMore for cursor-based pagination
+    const nextCursor = items.length === limitNum && items.length > 0 
+      ? items[items.length - 1].createdAt.toISOString() 
+      : null;
+    const hasMore = items.length === limitNum;
+    const total = cursor ? null : await Item.countDocuments(query); // Only count on first page
 
     res.json({
       items: itemsWithRawLinks,
       total,
-      page: parseInt(page),
-      totalPages: Math.ceil(total / limitNum),
-      hasMore: skip + limitNum < total
+      nextCursor,
+      hasMore
     });
   } catch (error) {
     console.error('Error fetching items:', error);

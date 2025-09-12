@@ -4,6 +4,10 @@ class GoatMartApp {
         this.currentSearch = '';
         this.currentType = 'all';
         this.isLoading = false;
+        this.currentCursor = null;
+        this.hasMore = true;
+        this.loadedIds = new Set();
+        this.observer = null;
         this.init();
     }
 
@@ -19,7 +23,7 @@ class GoatMartApp {
             this.detectColorScheme();
             this.setupThemeToggle();
             this.loadStats();
-            this.loadCommands();
+            this.loadCommands('', 'all', true);
             this.setupSearchAndFilters();
         });
 
@@ -72,37 +76,6 @@ class GoatMartApp {
         this.setupFormEnhancements();
     }
 
-    setupSearchAndFilters() {
-        // Enhanced search functionality with AI suggestions
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            // Clear any existing listeners
-            searchInput.removeEventListener('input', this.searchHandler);
-
-            // Create search suggestions dropdown
-            this.createSearchSuggestions(searchInput);
-
-            // Advanced search with debouncing
-            this.searchHandler = this.debounce(async (e) => {
-                const query = e.target.value.trim();
-                if (query.length > 1) {
-                    await this.performAdvancedSearch(query);
-                    this.showSearchSuggestions(query);
-                } else {
-                    this.hideSearchSuggestions();
-                }
-            }, 300);
-
-            searchInput.addEventListener('input', this.searchHandler);
-            searchInput.addEventListener('focus', () => this.showRecentSearches());
-
-            // Voice search support
-            this.setupVoiceSearch(searchInput);
-        }
-
-        // Advanced filters
-        this.setupAdvancedFilters();
-    }
 
     setupAdvancedFilters() {
         const filterContainer = document.getElementById('filterContainer');
@@ -120,7 +93,7 @@ class GoatMartApp {
 
     applyFilter(type) {
         this.currentType = type;
-        this.loadCommands(this.currentSearch, this.currentType);
+        this.loadCommands(true);
     }
 
     async performAdvancedSearch(query) {
@@ -204,7 +177,7 @@ class GoatMartApp {
                     searchInput.value = suggestion;
                     this.hideSearchSuggestions();
                     this.currentSearch = suggestion;
-                    this.loadCommands(this.currentSearch, this.currentType);
+                    this.loadCommands(this.currentSearch, this.currentType, true);
                 }
             });
             suggestionsContainer.appendChild(div);
@@ -238,7 +211,7 @@ class GoatMartApp {
                     searchInput.value = search;
                     this.hideSearchSuggestions();
                     this.currentSearch = search;
-                    this.loadCommands(this.currentSearch, this.currentType);
+                    this.loadCommands(this.currentSearch, this.currentType, true);
                 }
             });
             suggestionsContainer.appendChild(div);
@@ -280,7 +253,7 @@ class GoatMartApp {
                 }
                 inputElement.value = interimTranscript;
                 this.currentSearch = interimTranscript;
-                this.loadCommands(this.currentSearch, this.currentType);
+                this.loadCommands(this.currentSearch, this.currentType, true);
             };
 
             recognition.onend = () => {
@@ -313,7 +286,7 @@ class GoatMartApp {
                 const searchValue = searchInput.value.trim();
                 this.currentSearch = searchValue;
                 console.log('Searching for:', searchValue);
-                this.loadCommands(this.currentSearch, this.currentType);
+                this.loadCommands(this.currentSearch, this.currentType, true);
             }, 300);
 
             searchInput.addEventListener('input', this.searchHandler);
@@ -368,7 +341,7 @@ class GoatMartApp {
                 chip.classList.add('active');
                 this.currentType = chip.dataset.type;
                 console.log('Filter changed to:', this.currentType);
-                this.loadCommands(this.currentSearch, this.currentType);
+                this.loadCommands(this.currentSearch, this.currentType, true);
             });
         });
     }
@@ -701,14 +674,28 @@ class GoatMartApp {
         this.currentType = type;
         this.isLoading = true;
 
-        container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">Loading all commands...</div></div>';
+        // Enhanced loading state
+        container.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-spinner-modern"></div>
+                <div class="loading-text">Loading all commands...</div>
+                <div class="loading-subtitle">Fetching the latest bot commands for you</div>
+            </div>
+        `;
 
         try {
             const params = new URLSearchParams();
             if (search && search.trim()) params.append('search', search.trim());
             if (type !== 'all') params.append('category', type);
-            // Remove limit to get all commands
-            params.append('limit', '1000'); // Set high limit to get all commands
+            // Remove limit to load ALL commands
+            // Implement proper infinite loading - start with reasonable batch size
+            params.append('limit', '50'); // Start with 50 commands for better performance
+            params.append('page', '1'); // Always start from page 1
+            
+            // Start fresh loading for new search/filter
+            if (this.currentPage === 1) {
+                this.allCommands = [];
+            }
 
             const response = await fetch(`/api/items?${params}`);
             if (!response.ok) {
@@ -716,13 +703,41 @@ class GoatMartApp {
             }
             const data = await response.json();
 
+            // Update pagination info
+            this.totalPages = data.totalPages || 1;
+            this.hasMore = data.hasMore || false;
+
             if (data.items && data.items.length > 0) {
-                const commandCards = data.items.map(command => this.createCommandCard(command)).join('');
+                // Add new items to our collection
+                this.allCommands = this.currentPage === 1 ? data.items : [...this.allCommands, ...data.items];
+                
+                // Render all commands
+                const commandCards = this.allCommands.map(command => this.createCommandCard(command)).join('');
                 container.innerHTML = commandCards;
+
+                // Add load more button if there are more items
+                if (this.hasMore && this.currentPage < this.totalPages) {
+                    container.innerHTML += `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 32px;">
+                            <button id="loadMoreBtn" class="btn btn-contained" style="padding: 16px 32px; font-size: 16px; font-weight: 600;">
+                                <i class="material-icons" style="margin-right: 8px;">expand_more</i>
+                                Load More Commands (${this.allCommands.length} of ${data.total})
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Add click handler for load more button
+                    document.getElementById('loadMoreBtn')?.addEventListener('click', () => {
+                        this.loadMoreCommands();
+                    });
+                }
 
                 // Re-attach event listeners to new cards
                 this.attachCardEventListeners();
-            } else {
+
+                // Show total count
+                this.updateCommandCount(this.allCommands.length, data.total);
+            } else if (this.currentPage === 1) {
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 64px 16px; color: var(--on-surface); opacity: 0.7;">
                         <i class="material-icons" style="font-size: 64px; margin-bottom: 16px;">search_off</i>
@@ -747,6 +762,76 @@ class GoatMartApp {
         }
 
         this.isLoading = false;
+    }
+
+    async loadMoreCommands() {
+        if (this.isLoading || !this.hasMore) return;
+        
+        this.currentPage++;
+        await this.loadCommands(this.currentSearch, this.currentType);
+    }
+
+    updateCommandCount(showing, total) {
+        // Update header with command count
+        const countElement = document.getElementById('commandCount');
+        if (countElement) {
+            countElement.textContent = showing === total 
+                ? `Showing all ${total} commands`
+                : `Showing ${showing} of ${total} commands`;
+        }
+    }
+
+    clearCommandsUI() {
+        const container = document.getElementById('commandsContainer');
+        container.innerHTML = '<div id="infiniteSentinel" style="grid-column: 1 / -1; height: 1px;"></div>';
+    }
+
+    appendCommandCard(item) {
+        const key = item.shortId || item.itemID;
+        if (this.loadedIds.has(key)) return;
+        this.loadedIds.add(key);
+        
+        const container = document.getElementById('commandsContainer');
+        const sentinel = document.getElementById('infiniteSentinel');
+        const cardHTML = this.createCommandCard(item);
+        
+        const cardElement = document.createElement('div');
+        cardElement.innerHTML = cardHTML;
+        container.insertBefore(cardElement.firstElementChild, sentinel);
+        
+        this.attachCardEventListeners();
+    }
+
+    setupInfiniteScroll() {
+        if (this.observer) this.observer.disconnect();
+        
+        const sentinel = document.getElementById('infiniteSentinel');
+        if (!sentinel) return;
+        
+        this.observer = new IntersectionObserver((entries) => {
+            if (entries.some(e => e.isIntersecting) && this.hasMore && !this.isLoading) {
+                this.loadCommands();
+            }
+        }, { root: null, rootMargin: '600px', threshold: 0 });
+        
+        this.observer.observe(sentinel);
+    }
+
+    showEndOfList() {
+        const container = document.getElementById('commandsContainer');
+        const sentinel = document.getElementById('infiniteSentinel');
+        if (sentinel) {
+            sentinel.innerHTML = '<div style="text-align: center; padding: 32px; color: var(--on-surface); opacity: 0.7;"><i class="material-icons" style="font-size: 24px; margin-bottom: 8px;">done_all</i><p>You\'ve reached the end! 🎉</p></div>';
+        }
+    }
+
+    showFetchError(err) {
+        console.error('Error loading commands:', err);
+        const container = document.getElementById('commandsContainer');
+        const sentinel = document.getElementById('infiniteSentinel');
+        if (sentinel) {
+            sentinel.innerHTML = '<div style="text-align: center; padding: 32px; color: var(--error);"><i class="material-icons" style="font-size: 48px; margin-bottom: 16px;">error</i><h3>Error loading commands</h3><button class="btn btn-contained" onclick="window.app.loadCommands()">Try Again</button></div>';
+        }
     }
 
     attachCardEventListeners() {

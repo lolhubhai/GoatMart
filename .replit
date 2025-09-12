@@ -15,11 +15,10 @@ ignorePorts = false
 
 [[ports]]
 localPort = 3000
-externalPort = 80
 
 [[ports]]
 localPort = 5000
-externalPort = 80
+externalPort = 3000
 
 [workflows]
 runButton = "Project"
